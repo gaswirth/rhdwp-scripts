@@ -19,6 +19,7 @@ echo "--- Here we go... ---"
 echo "---------------------"
 
 DIR=$(pwd)
+DEVPATH=/var/www/public_html/dev.roundhouse-designs.com/public/"$DEVDIR"
 mkdir "$DEVDIR"
 cd "$DEVDIR"
 
@@ -46,7 +47,7 @@ fi
 # Perform theme directory actions
 cd wp-content/themes/rhd
 bower install jquery Slidebars packery fitvids
-mv crossdomain.xml.movetoroot "$DEVDIR"/crossdomain.xml
+mv crossdomain.xml.movetoroot "$DEVPATH"/crossdomain.xml
 
 # While we're still in wp-content, change SITEBASE placeholders to dev directory name for our Stylus vars
 # We'll also change the main site name in style.css
@@ -58,7 +59,7 @@ grunt stylus:dev
 # Rename the theme directory
 cd .. && mv rhd "$THEMESLUG"
 wp theme activate "$THEMESLUG"
-cd /var/www/public_html/dev.roundhouse-designs.com/public/"$DEVDIR"
+cd "$DEVPATH"
 
 # Install WPMUDEV Dashboard
 cp -rv /home/gaswirth/resources/plugins/wpmudev/wpmudev-updates wp-content/plugins/
@@ -84,7 +85,7 @@ wp plugin install akismet w3-total-cache wp-social-likes gotmls
 wp plugin update --all --quiet
 
 # Set final permissions
-cd /var/www/public_html/dev.roundhouse-designs.com/public/"$DEVDIR"
+cd "$DEVPATH"
 sudo find . -type f -exec chmod 664 {} \;
 sudo find . -type d -exec chmod 774 {} \;
 sudo chmod -R 775 wp-content
