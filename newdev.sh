@@ -48,6 +48,7 @@ fi
 cd wp-content/themes/rhd
 bower install jquery Slidebars packery fitvids
 mv crossdomain.xml.movetoroot "$DEVPATH"/crossdomain.xml
+rm README.md
 
 # While we're still in wp-content, change SITEBASE placeholders to dev directory name for our Stylus vars
 # We'll also change the main site name in style.css
@@ -56,9 +57,11 @@ sed -i 's/SITEBASE/"$DEVDIR"/g' stylus/partials/_global.styl
 sed -ri "s/Theme Name: (.*?)/Theme Name: RHD $TITLE/g" style.css
 grunt stylus:dev
 
-# Rename the theme directory
+# Rename the theme directory, activate the theme, and create the primary nav menu
 cd .. && mv rhd "$THEMESLUG"
 wp theme activate "$THEMESLUG"
+wp menu create "Site Navigation"
+wp menu location assign "Site Navigation" primary
 cd "$DEVPATH"
 
 # Install WPMUDEV Dashboard
