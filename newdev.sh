@@ -65,13 +65,14 @@ wp menu create "Site Navigation"
 wp menu location assign "Site Navigation" primary
 cd "$DEVPATH"
 
-# Install WPMUDEV Dashboard
+# Install WPMUDEV + Dashboard
 cp -rv /home/gaswirth/resources/plugins/wpmudev/wpmudev-updates wp-content/plugins/
 cp -rv /home/gaswirth/resources/plugins/wpmudev/google-analytics-async wp-content/plugins/
 cp -rv /home/gaswirth/resources/plugins/wpmudev/wp-smush-pro wp-content/plugins/
 cp -rv /home/gaswirth/resources/plugins/wpmudev/wpmu-dev-seo wp-content/plugins
 cp -rv /home/gaswirth/resources/plugins/soliloquy wp-content/plugins
 cp -rv /home/gaswirth/resources/plugins/ninja-forms-mailchimp wp-content/plugins
+cp -rv /home/gaswirth/resources/plugins/wp-hummingbird
 
 # Set up mu-plugins directory
 mkdir wp-content/mu-plugins
@@ -84,9 +85,9 @@ rm -rf `find wp-content/themes -type d -name 'twenty*'`
 wp plugin install ninja-forms ajax-thumbnail-rebuild intuitive-custom-post-order enable-media-replace wp-social-likes wp-retina-2x tinymce-advanced velvet-blues-update-urls force-strong-passwords cloudflare --activate
 
 # Install plugins but don't activate
-wp plugin install akismet w3-total-cache wp-social-likes gotmls
+wp plugin install akismet w3-total-cache wp-social-likes gotmls rest-api
 
-# Update and activate  private plugins
+# Update and activate private plugins
 wp plugin activate wpmudev-updates wpmu-dev-seo wp-smush-pro google-analytics-async 
 wp plugin update --all --quiet
 
