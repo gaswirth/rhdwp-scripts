@@ -11,7 +11,9 @@ read -p "Database name: " DBNAME
 read -p "Database user: " DBUSER
 read -s -p "Database password: " DBPASS
 echo ""
-read -p "Theme (scrolly OR hannah): " THEME
+read -s -p "MySQL Admin password: " DBROOTPASS
+echo ""
+read -p "Theme (scrolly/hannah/slideways): " THEME
 read -p "Branch: " BRANCH
 
 echo "---------------------"
@@ -23,12 +25,21 @@ DEVPATH=/var/www/public_html/dev.roundhouse-designs.com/public/"$DEVDIR"
 mkdir "$DEVDIR"
 cd "$DEVDIR"
 
-wp core download && wp core config --dbname="$DBNAME" --dbprefix="rhd_wp_" --dbuser="$DBUSER" --dbpass="$DBPASS" --extra-php <<PHP 
+# MySQL Setup
+mysql -u root -p"$DBROOTPASS" << EOF
+CREATE DATABASE $DBNAME;
+CREATE USER $DBUSER;
+GRANT ALL PRIVILEGES ON $DBNAME.* TO "$DBUSER"@'localhost' IDENTIFIED BY '$DBPASS';
+FLUSH PRIVILEGES;
+EOF
+
+wp core download && wp core config --dbname="$DBNAME" --dbprefix="rhd_wp_" --dbuser="$DBUSER" --dbpass="$DBPASS" --extra-php << PHP 
 define ( 'WP_DEBUG', true );
 define ( 'WP_DEBUG_LOG', true );
 define( 'FORCE_SSL_ADMIN', true );
 \$_SERVER['HTTPS']='on';
 PHP
+
 wp core install --url="http://dev.roundhouse-designs.com/${DEVDIR}" --title="$TITLE" --admin_user="nick" --admin_password="H961CxwzdYymwIelIRQm" --admin_email="nick@roundhouse-designs.com"
 wp rewrite structure '/%postname%/'
 
@@ -72,7 +83,6 @@ cp -rv /home/gaswirth/resources/plugins/wpmudev/wp-smush-pro wp-content/plugins/
 cp -rv /home/gaswirth/resources/plugins/wpmudev/wpmu-dev-seo wp-content/plugins
 cp -rv /home/gaswirth/resources/plugins/soliloquy wp-content/plugins
 cp -rv /home/gaswirth/resources/plugins/ninja-forms-mailchimp wp-content/plugins
-cp -rv /home/gaswirth/resources/plugins/wp-hummingbird
 
 # Set up mu-plugins directory
 mkdir wp-content/mu-plugins
