@@ -1,2 +1,2 @@
-# rhdwp-newdev
+# rhdbuild
 Dev site setup script
