@@ -87,7 +87,7 @@ cp -rv /home/gaswirth/resources/plugins/ninja-forms-mailchimp wp-content/plugins
 
 # Set up mu-plugins directory
 mkdir wp-content/mu-plugins
-cp -r /home/gaswirth/resources/rhd-wp-setup/mu-load.php wp-content/mu-plugins
+git clone git@github.com:gaswirth/rhdwp-mu-loader.git wp-content/mu-plugins
 
 # Get rid of built-in themes
 rm -rf `find wp-content/themes -type d -name 'twenty*'`
