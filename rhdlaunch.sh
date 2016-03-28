@@ -37,7 +37,8 @@ cd $DEVPATH
 wp option update admin_email "$ADMINEMAIL"
 wp core update
 wp plugin update --all
-wp search-replace "//dev.roundhouse-designs.com/$1" "//$2"
+wp search-replace "https://dev.roundhouse-designs.com/$1" "http://$2"
+wp search-replace "http://dev.roundhouse-designs.com/$1" "http://$2"
 
 # Create and move to the launch directory
 mkdir $DOMAINPATH
