@@ -38,7 +38,6 @@ define( 'WPLANG', '');
 define ( 'WP_DEBUG', true );
 define ( 'WP_DEBUG_LOG', true );
 define( 'FORCE_SSL_ADMIN', true );
-\$_SERVER['HTTPS']='on';
 PHP
 
 wp core install --url="http://dev.roundhouse-designs.com/${DEVDIR}" --title="$TITLE" --admin_user="nick" --admin_password="H961CxwzdYymwIelIRQm" --admin_email="nick@roundhouse-designs.com"
