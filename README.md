@@ -1,3 +1,5 @@
 # rhdwp-scripts
--Dev site setup script
--Site launch script
+## Private
+### RHD WordPress site build, launch, and maintenance scripts.
+- Dev site setup script
+- Site launch script
