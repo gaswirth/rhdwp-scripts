@@ -58,7 +58,7 @@ sudo service apache2 reload
 cd $DOMAINPATH/public
 sudo find . -type f -exec chmod 664 {} \;
 sudo find . -type d -exec chmod 774 {} \;
-sudo chmod -R 775 wp-content
+sudo chmod -R 755 wp-content
 sudo mv wp-config.php ../
 sudo chown -R www-data:www-data .
 
