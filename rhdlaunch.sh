@@ -54,17 +54,16 @@ sudo a2ensite $APACHEFILE
 sudo service apache2 reload
 
 
-# Set final permissions
+# Run last WP-CLI actions and set final permissions
 cd $DOMAINPATH/public
+wp rewrite structure '/%postname%/'
+wp plugin activate w3-total-cache
+
 sudo find . -type f -exec chmod 664 {} \;
 sudo find . -type d -exec chmod 774 {} \;
 sudo chmod -R 755 wp-content
 sudo mv wp-config.php ../
 sudo chown -R www-data:www-data .
-
-# Last WP-CLI actions
-wp rewrite structure '/%postname%/'
-wp plugin activate w3-total-cache
 
 echo '---------------------------------'
 echo '------ You did it, tiger!! ------'
