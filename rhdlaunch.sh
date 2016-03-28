@@ -53,7 +53,7 @@ sudo service apache2 reload
 
 
 # Set final permissions
-cd $DOMAINPATH
+cd $DOMAINPATH/public
 sudo find . -type f -exec chmod 664 {} \;
 sudo find . -type d -exec chmod 774 {} \;
 sudo chmod -R 775 wp-content
