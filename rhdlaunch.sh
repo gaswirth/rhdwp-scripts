@@ -42,7 +42,7 @@ mkdir $DOMAINPATH
 mkdir $DOMAINPATH/public
 mkdir $DOMAINPATH/log
 cp -r $DEVPATH/* $DOMAINPATH
-
+rm -rf $DEVPATH
 
 # Apache work
 cd $APACHEDIR
