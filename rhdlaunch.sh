@@ -58,7 +58,7 @@ sudo service apache2 reload
 
 # Run last WP-CLI actions and set final permissions
 cd $DOMAINPATH/public
-wp rewrite structure '/%postname%/'
+wp rewrite flush --hard
 wp plugin activate w3-total-cache
 
 sudo find . -type f -exec chmod 664 {} \;
