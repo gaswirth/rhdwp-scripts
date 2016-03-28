@@ -60,6 +60,8 @@ sudo chmod -R 775 wp-content
 sudo mv wp-config.php ../
 sudo chown -R www-data:www-data .
 
+wp rewrite structure '/%postname%/'
+
 echo '---------------------------------'
 echo '------ You did it, tiger!! ------'
 echo '---------------------------------'
