@@ -19,6 +19,7 @@ echo "Launching $1 to $2"
 
 read -p "Database name: " DBNAME
 read -s -p "Database admin password: " DBROOTPASS
+echo ""
 read -p "Client admin email: " ADMINEMAIL
 echo ""
 
