@@ -32,10 +32,12 @@ cp -rv $1 $1.bak
 mysqldump -u root -p"$DBROOTPASS" $DBNAME > $1.prelaunch.sql
 
 
-# Run the migrate!
+# Update Core and Plugins, then run the migrate!
 cd $DEVPATH
-wp search-replace "//dev.roundhouse-designs.com/$1" "//$2"
 wp option update admin_email "$ADMINEMAIL"
+wp core update
+wp plugin update --all
+wp search-replace "//dev.roundhouse-designs.com/$1" "//$2"
 
 # Create and move to the launch directory
 mkdir $DOMAINPATH
@@ -60,7 +62,9 @@ sudo chmod -R 775 wp-content
 sudo mv wp-config.php ../
 sudo chown -R www-data:www-data .
 
+# Last WP-CLI actions
 wp rewrite structure '/%postname%/'
+wp plugin activate w3-total-cache
 
 echo '---------------------------------'
 echo '------ You did it, tiger!! ------'
