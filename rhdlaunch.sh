@@ -41,7 +41,7 @@ wp option update admin_email "$ADMINEMAIL"
 mkdir $DOMAINPATH
 mkdir $DOMAINPATH/public
 mkdir $DOMAINPATH/log
-cp -r $DEVPATH/* $DOMAINPATH
+cp -r $DEVPATH/* $DOMAINPATH/public
 rm -rf $DEVPATH
 
 # Apache work
