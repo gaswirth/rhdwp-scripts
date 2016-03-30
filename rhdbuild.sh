@@ -38,12 +38,14 @@ define( 'WPLANG', '');
 define ( 'WP_DEBUG', true );
 define ( 'WP_DEBUG_LOG', true );
 define( 'FORCE_SSL_ADMIN¡', true );
-if (\$_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https')
+if (!empty(\$_SERVER['HTTP_X_FORWARDED_PROTO']) && \$_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https')
         \$_SERVER['HTTPS']='on';
 PHP
 
 wp core install --url="http://dev.roundhouse-designs.com/${DEVDIR}" --title="$TITLE" --admin_user="nick" --admin_password="H961CxwzdYymwIelIRQm" --admin_email="nick@roundhouse-designs.com"
-wp rewrite structure '/%postname%/'
+
+#wp rewrite structure '/%postname%/'
+wp rewrite flush --hard
 
 # Finish user creation
 wp user create ryan ryan@roundhouse-designs.com --role="administrator" --first_name="Ryan" --last_name="Foy" --send-email
