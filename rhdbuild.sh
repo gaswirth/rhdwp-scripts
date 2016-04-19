@@ -62,6 +62,8 @@ fi
 
 # Perform theme directory actions
 cd wp-content/themes/rhd
+npm install grunt
+npm install --save-dev grunt-contrib-stylus grunt-modernizr grunt-contrib-watch grunt-contrib-jshint
 bower install jquery Slidebars packery fitvids
 mv crossdomain.xml.movetoroot "$DEVPATH"/crossdomain.xml
 rm README.md
