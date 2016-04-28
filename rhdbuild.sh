@@ -98,7 +98,7 @@ git clone git@github.com:gaswirth/rhdwp-mu-loader.git wp-content/mu-plugins
 rm -rf `find wp-content/themes -type d -name 'twenty*'`
 
 # Install and activate plugins
-wp plugin install ninja-forms ajax-thumbnail-rebuild intuitive-custom-post-order enable-media-replace wp-social-likes wp-retina-2x tinymce-advanced velvet-blues-update-urls force-strong-passwords cloudflare --activate
+wp plugin install ninja-forms ajax-thumbnail-rebuild intuitive-custom-post-order enable-media-replace wp-social-likes wp-retina-2x tinymce-advanced force-strong-passwords cloudflare --activate
 
 # Install plugins but don't activate
 wp plugin install akismet w3-total-cache wp-social-likes gotmls rest-api
