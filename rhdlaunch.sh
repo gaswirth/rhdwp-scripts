@@ -61,6 +61,7 @@ cd $DOMAINPATH/public
 wp rewrite flush --hard
 wp plugin activate w3-total-cache
 
+sudo find . -name '*.dead' -exec rm {} \;
 sudo find . -type f -exec chmod 664 {} \;
 sudo find . -type d -exec chmod 774 {} \;
 sudo chmod -R 775 wp-content
