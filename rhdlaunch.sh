@@ -67,6 +67,7 @@ sudo find . -type d -exec chmod 774 {} \;
 sudo chmod -R 775 wp-content
 sudo mv wp-config.php ../
 sudo chown -R www-data:www-data .
+sudo sed -i "s/'WP_DEBUG_LOG', true/'WP_DEBUG_LOG', false/i" wp-config.php
 
 echo '---------------------------------'
 echo '------ You did it, tiger!! ------'
