@@ -35,7 +35,6 @@ EOF
 
 wp core download && wp core config --dbname="$DBNAME" --dbprefix="rhd_wp_" --dbuser="$DBUSER" --dbpass="$DBPASS" --extra-php << PHP 
 define( 'WPLANG', '');
-define ( 'WP_DEBUG', true );
 define ( 'WP_DEBUG_LOG', true );
 define( 'FORCE_SSL_ADMIN', true );
 if (!empty(\$_SERVER['HTTP_X_FORWARDED_PROTO']) && \$_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https')
