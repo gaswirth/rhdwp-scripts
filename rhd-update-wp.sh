@@ -18,6 +18,8 @@ for d in /var/www/public_html/dev.roundhouse-designs.com/public/*; do
         if [ -d $d ]
 	then
 		path="$d"
-        	wp plugin update --all --path=$path --quiet && wp theme update --all --path=$path --quiet && wp core update --path=$path --quiet
+		 sudo -u gaswirth -i wp plugin update --all --path=$path --quiet
+		 sudo -u gaswirth -i wp theme update --all --path=$path --quiet
+		 sudo -u gaswirth -i wp core update --path=$path --quiet
 	fi
 done
