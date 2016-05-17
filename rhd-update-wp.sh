@@ -2,7 +2,7 @@
 export PATH="/home/gaswirth/npm/bin:/home/gaswirth/.npm/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games"
 
 for d in /var/www/public_html/*; do
-	if [ -d $d ] && [ $d != dev.roundhouse-designs.com ]
+	if [ -d $d ] && [[ $d != dev.roundhouse-designs.com* ]]
 	then
 		path="$d/public"
 		echo "SITE: $d"
