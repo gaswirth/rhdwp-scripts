@@ -1,9 +1,9 @@
 #!/bin/sh
 DIR=/home/gaswirth/scripts/s3-backup
 EXCLUDES="$DIR"/s3.exclude
-LINODE=$1
+HOSTNAME=`hostname`
 
-echo 'S3 Backup Started'
+echo "S3 Backup Started on $HOSTNAME"
 date +'%a %b %e %H:%M:%S %Z %Y'
 s3cmd sync --delete-removed --recursive --preserve --exclude-from $EXCLUDES /home s3://linode-$LINODE
 s3cmd sync --delete-removed --recursive --preserve --exclude-from $EXCLUDES /etc s3://linode-$LINODE
