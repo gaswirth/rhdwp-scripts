@@ -44,7 +44,7 @@ PHP
 
 wp core install --url="http://dev.roundhouse-designs.com/${DEVDIR}" --title="$TITLE" --admin_user="nick" --admin_password="H961CxwzdYymwIelIRQm" --admin_email="nick@roundhouse-designs.com"
 
-#wp rewrite structure '/%postname%/'
+wp rewrite structure '/%postname%/'
 wp rewrite flush --hard
 
 # Finish user creation
