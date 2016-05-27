@@ -64,7 +64,6 @@ cd wp-content/themes/rhd
 npm install grunt
 npm install --save-dev grunt-contrib-stylus grunt-modernizr grunt-contrib-watch grunt-contrib-jshint
 bower install jquery fitvids
-mv crossdomain.xml.movetoroot "$DEVPATH"/crossdomain.xml
 rm README.md
 
 # While we're still in wp-content, change SITEBASE placeholders to dev directory name for our Stylus vars
