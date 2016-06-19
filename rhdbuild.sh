@@ -25,15 +25,27 @@ DEVPATH=/var/www/public_html/dev.roundhouse-designs.com/public/"$DEVDIR"
 mkdir "$DEVDIR"
 cd "$DEVDIR"
 
-# MySQL Setup
-mysql -u root -p"$DBROOTPASS" << EOF
-CREATE DATABASE $DBNAME;
-CREATE USER $DBUSER;
-GRANT ALL PRIVILEGES ON $DBNAME.* TO "$DBUSER"@'localhost' IDENTIFIED BY '$DBPASS';
-FLUSH PRIVILEGES;
-EOF
+# MySQL Setup for dev (joanna/local) and live (hannah/remote)
+echo "CREATE DATABASE $DBNAME;" > /tmp/rhdsetup.tmp.sql
+echo "CREATE USER $DBUSER;" >> /tmp/rhdsetup.tmp.sql
+echo "GRANT ALL PRIVILEGES ON $DBNAME.* TO '$DBUSER'@'localhost' IDENTIFIED BY '$DBPASS';" >> /tmp/rhdsetup.tmp.sql
+echo "FLUSH PRIVILEGES;" >> /tmp/rhdsetup.tmp.sql
 
-wp core download && wp core config --dbname="$DBNAME" --dbprefix="rhd_wp_" --dbuser="$DBUSER" --dbpass="$DBPASS" --extra-php << PHP 
+scp /tmp/rhdsetup.tmp.sql gaswirth@hannah:/tmp
+
+mysql -u root -p"$DBROOTPASS" < /tmp/rhdsetup.tmp.sql; rm /tmp/rhdsetup.tmp.sql
+ssh gaswirth@hannah 'mysql -u root -p"$DBROOTPASS" < /tmp/rhdsetup.tmp.sql; rm /tmp/rhdsetup.tmp.sql'
+
+# mysql -u root -p"$DBROOTPASS" << EOF
+# CREATE DATABASE $DBNAME;
+# CREATE USER $DBUSER;
+# GRANT ALL PRIVILEGES ON $DBNAME.* TO "$DBUSER"@'localhost' IDENTIFIED BY '$DBPASS';
+# FLUSH PRIVILEGES;
+# EOF
+
+
+
+wp core download && wp core config --dbname="$DBNAME" --dbprefix="rhd_wp_" --dbuser="$DBUSER" --dbpass="$DBPASS" --extra-php << PHP
 define( 'WPLANG', '');
 define ( 'WP_DEBUG_LOG', true );
 define( 'FORCE_SSL_ADMIN', true );
@@ -103,7 +115,7 @@ wp plugin install ninja-forms ajax-thumbnail-rebuild intuitive-custom-post-order
 wp plugin install akismet w3-total-cache wp-social-likes gotmls rest-api
 
 # Update and activate private plugins
-wp plugin activate wpmudev-updates wpmu-dev-seo wp-smush-pro google-analytics-async 
+wp plugin activate wpmudev-updates wpmu-dev-seo wp-smush-pro google-analytics-async
 wp plugin update --all --quiet
 
 # Set final permissions
