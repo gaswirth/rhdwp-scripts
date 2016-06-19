@@ -33,8 +33,8 @@ echo "FLUSH PRIVILEGES;" >> /tmp/rhdsetup.tmp.sql
 
 scp /tmp/rhdsetup.tmp.sql gaswirth@hannah:/tmp
 
-mysql -u root -p"$DBROOTPASS" < /tmp/rhdsetup.tmp.sql; rm /tmp/rhdsetup.tmp.sql
-ssh gaswirth@hannah 'mysql -u root -p"$DBROOTPASS" < /tmp/rhdsetup.tmp.sql; rm /tmp/rhdsetup.tmp.sql'
+mysql -u root -p"$DBROOTPASS" < /tmp/rhdsetup.tmp.sql
+ssh gaswirth@hannah -c bash 'mysql -u root -p"$DBROOTPASS" < /tmp/rhdsetup.tmp.sql; rm /tmp/rhdsetup.tmp.sql'
 
 # mysql -u root -p"$DBROOTPASS" << EOF
 # CREATE DATABASE $DBNAME;
