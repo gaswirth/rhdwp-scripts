@@ -26,23 +26,23 @@ mkdir "$DEVDIR"
 cd "$DEVDIR"
 
 # MySQL Setup
-mysql -u root -p"$DBROOTPASS" << EOF
-CREATE DATABASE $DBNAME;
-CREATE USER $DBUSER;
-GRANT ALL PRIVILEGES ON $DBNAME.* TO "$DBUSER"@'localhost' IDENTIFIED BY '$DBPASS';
-FLUSH PRIVILEGES;
+mysql -u root -p"$DBROOTPASS" <<-EOF
+	CREATE DATABASE $DBNAME;
+	CREATE USER $DBUSER;
+	GRANT ALL PRIVILEGES ON $DBNAME.* TO "$DBUSER"@'localhost' IDENTIFIED BY '$DBPASS';
+	FLUSH PRIVILEGES;
 EOF
 
-wp core download && wp core config --dbname="$DBNAME" --dbprefix="rhd_wp_" --dbuser="$DBUSER" --dbpass="$DBPASS" --extra-php << PHP 
-// ROUNDHOUSE DESIGNS CUSTOMIZATIONS
-define( 'WPLANG', '');
-define ( 'WP_DEBUG_LOG', true );
-define( 'FORCE_SSL_ADMIN', true );
-if (!empty(\$_SERVER['HTTP_X_FORWARDED_PROTO']) && \$_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https')
-        \$_SERVER['HTTPS']='on';
-define( 'EMPTY_TRASH_DAYS', 30 );
-define( ‘WP_MEMORY_LIMIT’, ‘96M’ );
-define( ‘WP_MAX_MEMORY_LIMIT’, ‘256M’ );
+wp core download && wp core config --dbname="$DBNAME" --dbprefix="rhd_wp_" --dbuser="$DBUSER" --dbpass="$DBPASS" --extra-php <<-PHP 
+	// ROUNDHOUSE DESIGNS CUSTOMIZATIONS
+	define( 'WPLANG', '' );
+	define( 'WP_DEBUG_LOG', true );
+	define( 'FORCE_SSL_ADMIN', true );
+	if (!empty(\$_SERVER['HTTP_X_FORWARDED_PROTO']) && \$_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https')
+	        \$_SERVER['HTTPS']='on';
+	define( 'EMPTY_TRASH_DAYS', 30 );
+	define( 'WP_MEMORY_LIMIT', '-1' );
+	define( 'WP_MAX_MEMORY_LIMIT', '256M' );
 PHP
 
 wp core install --url="http://dev.roundhouse-designs.com/${DEVDIR}" --title="$TITLE" --admin_user="nick" --admin_password="H961CxwzdYymwIelIRQm" --admin_email="nick@roundhouse-designs.com"
