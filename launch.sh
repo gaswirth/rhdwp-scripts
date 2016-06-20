@@ -8,6 +8,7 @@ echo "---------------------"
 # $2: launch domain
 
 DEVROOT="/var/www/public_html/dev.roundhouse-designs.com/public"
+
 DEVDIR=$1
 DOMAIN=$2
 DEVPATH=$DEVROOT/$1
@@ -15,9 +16,14 @@ DOMAINPATH=/var/www/public_html/$2
 APACHEDIR=/etc/apache2/sites-available
 APACHEFILE=$2.conf
 
-echo "Launching $1 to $2"
+DBNAME=$(cat $DEVPATH/wp-config.php | grep "'DB_NAME', '" | awk '{print $2}' | sed -r "s/[\'|\)|;]//g")
+DBUSER=$(cat $DEVPATH/wp-config.php | grep "'DB_USER', '" | awk '{print $2}' | sed -r "s/[\'|\)|;]//g")
+DBPASS=$(cat $DEVPATH/wp-config.php | grep "'DB_PASSWORD', '" | awk '{print $2}' | sed -r "s/[\'|\)|;]//g")
+DBPASS_FILTERED=$(echo $DBPASS | sed -e 's/[^a-zA-Z0-9,._+@%/-]/\\&/g; 1{$s/^$/""/}; 1!s/^/"/; $!s/$/"/')
 
-read -p "Database name: " DBNAME
+echo "Launching $1 to $2 on hannah..."
+
+#read -p "Database name: " DBNAME
 read -s -p "Database admin password: " DBROOTPASS
 echo ""
 read -p "Client admin email: " ADMINEMAIL
@@ -27,9 +33,26 @@ echo "---------------------"
 echo "--- Here we go... ---"
 echo "---------------------"
 
-# Into the dev dir...
+
+# Set up remote MySQL and copy the site and database to the live server
+mysqldump -u root -p"$DBROOTPASS" $DBNAME | ssh gaswirth@hannah "cat > /tmp/$1.sql"
+
+ssh gaswirth@hannah <<-EOF1
+	mysql -u root -p"$DBROOTPASS" <<-EOF2
+		CREATE DATABASE $DBNAME;
+		CREATE USER '$DBUSER'@'localhost' IDENTIFIED BY '$DBPASS';
+		GRANT ALL PRIVILEGES ON $DBNAME.* TO '$DBUSER'@'localhost';
+		FLUSH PRIVILEGES;
+	EOF2
+	mysql -u root -p"$DBROOTPASS" $DBNAME < /tmp/$1.sql
+	# Remove temporary files
+	rm /tmp/$1.sql
+EOF1
+
+
+# Backup the development directory and database
 cd $DEVROOT
-cp -rv $1 $1.bak
+sudo cp -rv $1 $1.bak
 mysqldump -u root -p"$DBROOTPASS" $DBNAME > $1.prelaunch.sql
 
 
@@ -41,14 +64,18 @@ wp plugin update --all
 wp search-replace "https://dev.roundhouse-designs.com/$1" "http://$2"
 wp search-replace "http://dev.roundhouse-designs.com/$1" "http://$2"
 
-# Create and move to the launch directory
-mkdir $DOMAINPATH
-mkdir $DOMAINPATH/public
-mkdir $DOMAINPATH/log
-cp -r $DEVPATH/* $DOMAINPATH/public
-rm -rf $DEVPATH
+# Copy site files from dev to live
+scp -r $DEVPATH gaswirth@hannah:/tmp
 
-# Apache work
+#Open SSH connection...
+ssh -t gaswirth@hannah bash -c "'
+
+# Create and move to the launch directory, then remove the /tmp files
+mkdir -p $DOMAINPATH/{public,log}
+cp -r /tmp/$1/* $DOMAINPATH/public
+rm -rf /tmp/$1
+
+# Set up Apache to serve new site
 cd $APACHEDIR
 sudo cp _template.conf $APACHEFILE
 sudo sed -i "s/domain\.com/$2/g" $APACHEFILE
@@ -61,14 +88,18 @@ cd $DOMAINPATH/public
 wp rewrite flush --hard
 wp plugin activate w3-total-cache
 
-sudo find . -name '*.dead' -exec rm {} \;
+sudo find . -name "*.dead" -exec rm {} \;
 sudo find . -type f -exec chmod 664 {} \;
 sudo find . -type d -exec chmod 774 {} \;
 sudo chmod -R 775 wp-content
-sudo sed -i "s/'WP_DEBUG_LOG', true/'WP_DEBUG_LOG', false/i" wp-config.php
-sudo sed -i "s/'WP_MEMORY_LIMIT', '-1'/'WP_MEMORY_LIMIT', '96M'/i" wp-config.php
+sudo sed -i "s/\'WP_DEBUG_LOG\', true/\'WP_DEBUG_LOG\', false/i" wp-config.php
+sudo sed -i "s/\'WP_MEMORY_LIMIT', \'-1\'/\'WP_MEMORY_LIMIT\', \'96M\'/i" wp-config.php
 sudo mv wp-config.php ../
 sudo chown -R www-data:www-data .
+
+echo "Done! Disconnecting..."
+
+'"
 
 echo '---------------------------------'
 echo '------ You did it, tiger!! ------'
