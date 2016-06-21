@@ -21,19 +21,13 @@ DBUSER=$(cat $DEVPATH/wp-config.php | grep "'DB_USER', '" | awk '{print $2}' | s
 DBPASS=$(cat $DEVPATH/wp-config.php | grep "'DB_PASSWORD', '" | awk '{print $2}' | sed -r "s/[\'|\)|;]//g")
 DBPASS_FILTERED=$(echo $DBPASS | sed -e 's/[^a-zA-Z0-9,._+@%/-]/\\&/g; 1{$s/^$/""/}; 1!s/^/"/; $!s/$/"/')
 
-echo "Launching $1 to $2 on $LINODE..."
+echo "Launching $1 to $2 on hannah..."
 
-read -p "Live Linode name: " LINODE
+#read -p "Database name: " DBNAME
 read -s -p "Database admin password: " DBROOTPASS
 echo ""
 read -p "Client admin email: " ADMINEMAIL
 echo ""
-
-# Set default LINODE to "hannah" if empty
-if [[ -z $LINODE ]]
-then
-	LINODE="hannah"
-fi
 
 echo "---------------------"
 echo "--- Here we go... ---"
@@ -41,9 +35,9 @@ echo "---------------------"
 
 
 # Set up remote MySQL and copy the site and database to the live server
-mysqldump -u root -p"$DBROOTPASS" $DBNAME | ssh gaswirth@$LINODE "cat > /tmp/$1.sql"
+mysqldump -u root -p"$DBROOTPASS" $DBNAME | ssh gaswirth@hannah "cat > /tmp/$1.sql"
 
-ssh gaswirth@$LINODE <<-EOF1
+ssh gaswirth@hannah <<-EOF1
 	mysql -u root -p"$DBROOTPASS" <<-EOF2
 		CREATE DATABASE $DBNAME;
 		CREATE USER '$DBUSER'@'localhost' IDENTIFIED BY '$DBPASS';
@@ -71,13 +65,10 @@ wp search-replace "https://dev.roundhouse-designs.com/$1" "http://$2"
 wp search-replace "http://dev.roundhouse-designs.com/$1" "http://$2"
 
 # Copy site files from dev to live
-scp -r $DEVPATH gaswirth@$LINODE:/tmp
+scp -r $DEVPATH gaswirth@hannah:/tmp
 
 #Open SSH connection...
-ssh -t gaswirth@$LINODE bash -c "'
-
-# Sudo as www-data
-sudo -su www-data
+ssh -t gaswirth@hannah bash -c "'
 
 # Create and move to the launch directory, then remove the /tmp files
 mkdir -p $DOMAINPATH/{public,log}
@@ -86,30 +77,28 @@ rm -rf /tmp/$1
 
 # Set up Apache to serve new site
 cd $APACHEDIR
-cp _template.conf $APACHEFILE
-sed -i "s/domain\.com/$2/g" $APACHEFILE
-a2ensite $APACHEFILE
-service apache2 reload
+sudo cp _template.conf $APACHEFILE
+sudo sed -i "s/domain\.com/$2/g" $APACHEFILE
+sudo a2ensite $APACHEFILE
+sudo service apache2 reload
+
 
 # Run last WP-CLI actions and set final permissions
 cd $DOMAINPATH/public
 wp rewrite flush --hard
 wp plugin activate w3-total-cache
 
-find . -name "*.dead" -exec rm {} \;
-find . -type f -exec chmod 664 {} \;
-find . -type d -exec chmod 774 {} \;
-chmod -R 775 wp-content
-sed -i "s/\'WP_DEBUG_LOG\', true/\'WP_DEBUG_LOG\', false/i" wp-config.php
-sed -i "s/\'WP_MEMORY_LIMIT', \'-1\'/\'WP_MEMORY_LIMIT\', \'96M\'/i" wp-config.php
-mv wp-config.php ../
-chown -R www-data:www-data .
+sudo find . -name "*.dead" -exec rm {} \;
+sudo find . -type f -exec chmod 664 {} \;
+sudo find . -type d -exec chmod 774 {} \;
+sudo chmod -R 775 wp-content
+sudo sed -i "s/\'WP_DEBUG_LOG\', true/\'WP_DEBUG_LOG\', false/i" wp-config.php
+sudo sed -i "s/\'WP_MEMORY_LIMIT', \'-1\'/\'WP_MEMORY_LIMIT\', \'96M\'/i" wp-config.php
+sudo mv wp-config.php ../
+sudo chown -R www-data:www-data .
 
-# Exit sudo
-exit
-
-# Disconnect
 echo "Done! Disconnecting..."
+
 '"
 
 echo '---------------------------------'
