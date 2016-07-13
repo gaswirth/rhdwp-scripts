@@ -9,8 +9,6 @@ echo "---------------------"
 
 DEVROOT="/var/www/public_html/dev.roundhouse-designs.com/public"
 
-DEVDIR=$1
-DOMAIN=$2
 DEVPATH=$DEVROOT/$1
 DOMAINPATH=/var/www/public_html/$2
 APACHEDIR=/etc/apache2/sites-available
