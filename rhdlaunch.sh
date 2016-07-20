@@ -30,7 +30,7 @@ read -p "Client admin email: " ADMINEMAIL
 echo ""
 
 # Set default LINODE to "hannah" if empty
-if [[ -z $LINODE ]]
+if [[ -z "$LINODE" ]]
 then
 	LINODE="hannah"
 fi
@@ -39,11 +39,10 @@ echo "---------------------"
 echo "--- Here we go... ---"
 echo "---------------------"
 
-
 # Set up remote MySQL and copy the site and database to the live server
-mysqldump -u root -p"$DBROOTPASS" $DBNAME | ssh gaswirth@$LINODE "cat > /tmp/$1.sql"
+mysqldump --add-drop-table -u root -p"$DBROOTPASS" $DBNAME | ssh gaswirth@"$LINODE" "cat > /tmp/$1.sql"
 
-ssh gaswirth@$LINODE <<-EOF1
+ssh gaswirth@"$LINODE" <<-EOF1
 	mysql -u root -p"$DBROOTPASS" <<-EOF2
 		CREATE DATABASE $DBNAME;
 		CREATE USER '$DBUSER'@'localhost' IDENTIFIED BY '$DBPASS';
@@ -71,10 +70,10 @@ wp search-replace "https://dev.roundhouse-designs.com/$1" "http://$DOMAIN"
 wp search-replace "http://dev.roundhouse-designs.com/$1" "http://$DOMAIN"
 
 # Copy site files from dev to live
-scp -r $DEVPATH gaswirth@$LINODE:/tmp
+scp -r $DEVPATH gaswirth@"$LINODE":/tmp
 
 #Open SSH connection...
-ssh -t gaswirth@$LINODE bash -c "'
+ssh -t gaswirth@"$LINODE" bash -c "'
 
 # Create and move to the launch directory, then remove the /tmp files
 sudo mkdir -p $DOMAINPATH/{public,log}
