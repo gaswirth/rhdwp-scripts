@@ -65,7 +65,7 @@ wp search-replace "https://dev.roundhouse-designs.com/$1" "http://$2"
 wp search-replace "http://dev.roundhouse-designs.com/$1" "http://$2"
 
 # Copy site files from dev to live
-scp -r $DEVPATH gaswirth@lovely:/tmp
+rsync -avze ssh $DEVPATH gaswirth@lovely:/tmp
 
 #Open SSH connection...
 ssh -t gaswirth@lovely bash -c "'
