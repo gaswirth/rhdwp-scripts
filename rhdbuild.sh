@@ -96,8 +96,9 @@ cp -rv /home/gaswirth/resources/plugins/ninja-forms-mailchimp wp-content/plugins
 mkdir wp-content/mu-plugins
 git clone git@github.com:gaswirth/rhdwp-mu-loader.git wp-content/mu-plugins
 
-# Get rid of built-in themes
+# Get rid of built-in themes and unwanted plugins
 rm -rf `find wp-content/themes -type d -name 'twenty*'`
+wp plugin delete hello
 
 # Install and activate plugins
 wp plugin install ninja-forms ajax-thumbnail-rebuild intuitive-custom-post-order enable-media-replace wp-social-likes wp-retina-2x tinymce-advanced force-strong-passwords cloudflare --activate
