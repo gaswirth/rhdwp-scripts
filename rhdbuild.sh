@@ -26,23 +26,23 @@ mkdir "$DEVDIR"
 cd "$DEVDIR"
 
 # MySQL Setup
-mysql -u root -p"$DBROOTPASS" <<-EOF
-	CREATE DATABASE $DBNAME;
-	CREATE USER $DBUSER;
-	GRANT ALL PRIVILEGES ON $DBNAME.* TO "$DBUSER"@'localhost' IDENTIFIED BY '$DBPASS';
-	FLUSH PRIVILEGES;
+mysql -u root -p"$DBROOTPASS" << EOF
+CREATE DATABASE $DBNAME;
+CREATE USER $DBUSER;
+GRANT ALL PRIVILEGES ON $DBNAME.* TO "$DBUSER"@'localhost' IDENTIFIED BY '$DBPASS';
+FLUSH PRIVILEGES;
 EOF
 
-wp core download && wp core config --dbname="$DBNAME" --dbprefix="rhd_wp_" --dbuser="$DBUSER" --dbpass="$DBPASS" --extra-php <<-PHP 
-	// ROUNDHOUSE DESIGNS CUSTOMIZATIONS
-	define( 'WPLANG', '' );
-	define( 'WP_DEBUG_LOG', true );
-	define( 'FORCE_SSL_ADMIN', true );
-	if (!empty(\$_SERVER['HTTP_X_FORWARDED_PROTO']) && \$_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https')
-	        \$_SERVER['HTTPS']='on';
-	define( 'EMPTY_TRASH_DAYS', 30 );
-	define( 'WP_MEMORY_LIMIT', '-1' );
-	define( 'WP_MAX_MEMORY_LIMIT', '-1' );
+wp core download && wp core config --dbname="$DBNAME" --dbprefix="rhd_wp_" --dbuser="$DBUSER" --dbpass="$DBPASS" --extra-php << PHP 
+// ROUNDHOUSE DESIGNS CUSTOMIZATIONS
+define( 'WPLANG', '');
+define ( 'WP_DEBUG_LOG', true );
+define( 'FORCE_SSL_ADMIN', true );
+if (!empty(\$_SERVER['HTTP_X_FORWARDED_PROTO']) && \$_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https')
+        \$_SERVER['HTTPS']='on';
+define( 'EMPTY_TRASH_DAYS', 30 );
+define( ‘WP_MEMORY_LIMIT’, ‘96M’ );
+define( ‘WP_MAX_MEMORY_LIMIT’, ‘256M’ );
 PHP
 
 wp core install --url="http://dev.roundhouse-designs.com/${DEVDIR}" --title="$TITLE" --admin_user="nick" --admin_password="H961CxwzdYymwIelIRQm" --admin_email="nick@roundhouse-designs.com"
@@ -96,11 +96,12 @@ cp -rv /home/gaswirth/resources/plugins/ninja-forms-mailchimp wp-content/plugins
 mkdir wp-content/mu-plugins
 git clone git@github.com:gaswirth/rhdwp-mu-loader.git wp-content/mu-plugins
 
-# Get rid of built-in themes
+# Get rid of built-in themes and unwanted plugins
 rm -rf `find wp-content/themes -type d -name 'twenty*'`
+wp plugin delete hello
 
 # Install and activate plugins
-wp plugin install ninja-forms ajax-thumbnail-rebuild intuitive-custom-post-order enable-media-replace wp-social-likes wp-retina-2x tinymce-advanced force-strong-passwords cloudflare wonderm00ns-simple-facebook-open-graph-tags --activate
+wp plugin install ninja-forms ajax-thumbnail-rebuild intuitive-custom-post-order enable-media-replace wp-social-likes wp-retina-2x tinymce-advanced force-strong-passwords cloudflare --activate
 
 # Install plugins but don't activate
 wp plugin install akismet w3-total-cache wp-social-likes gotmls rest-api
