@@ -52,7 +52,8 @@ EOF1
 
 # Backup the development directory and database
 cd $DEVROOT
-sudo cp -rv $1 $1.bak
+echo "Backing up..."
+sudo rsync -a $1 $1.bak
 mysqldump -u root -p"$DBROOTPASS" $DBNAME > $1.prelaunch.sql
 
 
@@ -72,14 +73,14 @@ ssh -t gaswirth@lovely bash -c "'
 
 # Create and move to the launch directory, then remove the /tmp files
 mkdir -p $DOMAINPATH/{public,log}
-cp -r /tmp/$1/* $DOMAINPATH/public
+rsync -a /tmp/$1/* $DOMAINPATH/public
 rm -rf /tmp/$1
 
 # Set up Apache to serve new site
 cd $APACHEDIR
 sudo cp _template.conf $APACHEFILE
 sudo sed -i "s/domain\.com/$2/g" $APACHEFILE
-sudo sed -i "s/poolname/
+sudo sed -i "s/poolname/$1/g" $APACHEFILE
 sudo a2ensite $APACHEFILE
 sudo service apache2 reload
 
@@ -89,13 +90,13 @@ cd $DOMAINPATH/public
 wp rewrite flush --hard
 wp plugin activate w3-total-cache
 
-sudo find . -name "*.dead" -exec rm {} \;
+sudo find wp-content/themes/ -name "*.dead" -exec rm {} \;
 sudo chmod 664 *;
 sudo find . -type d -exec chmod 774 {} \;
 sudo chmod -R 775 wp-content
 sudo sed -i "s/\'WP_DEBUG_LOG\', true/\'WP_DEBUG_LOG\', false/i" wp-config.php
 sudo sed -i "s/\'WP_MEMORY_LIMIT', \'-1\'/\'WP_MEMORY_LIMIT\', \'96M\'/i" wp-config.php
-sed -i "s/\'WP_MAX_MEMORY_LIMIT', \'-1\'/\'WP_MAX_MEMORY_LIMIT\', \'256M\'/i" wp-config.php
+sudo sed -i "s/\'WP_MAX_MEMORY_LIMIT', \'-1\'/\'WP_MAX_MEMORY_LIMIT\', \'256M\'/i" wp-config.php
 sudo mv wp-config.php ../
 sudo chown -R www-data:www-data .
 
