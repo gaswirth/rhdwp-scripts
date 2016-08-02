@@ -89,6 +89,8 @@ cp -rv /home/gaswirth/resources/plugins/wpmudev/wpmudev-updates wp-content/plugi
 cp -rv /home/gaswirth/resources/plugins/wpmudev/google-analytics-async wp-content/plugins/
 cp -rv /home/gaswirth/resources/plugins/wpmudev/wp-smush-pro wp-content/plugins/
 cp -rv /home/gaswirth/resources/plugins/wpmudev/wpmu-dev-seo wp-content/plugins
+cp -rv /home/gaswirth/resources/plugins/wpmudev/wp-defender wp-content/plugins/
+cp -rv /home/gaswirth/resources/plugins/wpmudev/wp-hummingbird wp-content/plugins
 cp -rv /home/gaswirth/resources/plugins/soliloquy wp-content/plugins
 cp -rv /home/gaswirth/resources/plugins/ninja-forms-mailchimp wp-content/plugins
 
@@ -104,10 +106,10 @@ wp plugin delete hello
 wp plugin install ninja-forms ajax-thumbnail-rebuild intuitive-custom-post-order enable-media-replace wp-social-likes wp-retina-2x tinymce-advanced force-strong-passwords cloudflare --activate
 
 # Install plugins but don't activate
-wp plugin install akismet w3-total-cache wp-social-likes gotmls rest-api
+wp plugin install akismet wp-social-likes gotmls rest-api
 
 # Update and activate private plugins
-wp plugin activate wpmudev-updates wpmu-dev-seo wp-smush-pro google-analytics-async 
+wp plugin activate wpmudev-updates wpmu-dev-seo wp-smush-pro google-analytics-async  wp-defender
 wp plugin update --all --quiet
 
 # Set final permissions
