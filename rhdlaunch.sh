@@ -94,12 +94,12 @@ wp plugin activate w3-total-cache
 
 sudo chown -R www-data:www-data .
 find . -name "*.dead" -exec sudo rm {} \;
-sudo chmod 664 {} \;
+sudo chmod 664 *
 find . -type d -exec sudo chmod 774 {} \;
 sudo chmod -R 775 wp-content
 sed -i "s/\'WP_DEBUG_LOG\', true/\'WP_DEBUG_LOG\', false/i" wp-config.php
-sed -i "s/\'WP_MEMORY_LIMIT', \'-1\'/\'WP_MEMORY_LIMIT\', \'96M\'/i" wp-config.php
-sed -i "s/\'WP_MAX_MEMORY_LIMIT', \'-1\'/\'WP_MAX_MEMORY_LIMIT\', \'256M\'/i" wp-config.php
+sed -i "s/\'WP_MEMORY_LIMIT\', \'-1\'/\'WP_MEMORY_LIMIT\', \'96M\'/i" wp-config.php
+sed -i "s/\'WP_MAX_MEMORY_LIMIT\', \'-1\'/\'WP_MAX_MEMORY_LIMIT\', \'256M\'/i" wp-config.php
 sudo mv wp-config.php ..
 
 # Disconnect
