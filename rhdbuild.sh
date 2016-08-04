@@ -88,7 +88,6 @@ cd "$DEVPATH"
 cp -rv /home/gaswirth/resources/plugins/wpmudev/wpmudev-updates wp-content/plugins/
 cp -rv /home/gaswirth/resources/plugins/wpmudev/google-analytics-async wp-content/plugins/
 cp -rv /home/gaswirth/resources/plugins/wpmudev/wp-smush-pro wp-content/plugins/
-cp -rv /home/gaswirth/resources/plugins/wpmudev/wpmu-dev-seo wp-content/plugins
 cp -rv /home/gaswirth/resources/plugins/wpmudev/wp-defender wp-content/plugins/
 cp -rv /home/gaswirth/resources/plugins/wpmudev/wp-hummingbird wp-content/plugins
 cp -rv /home/gaswirth/resources/plugins/soliloquy wp-content/plugins
@@ -109,7 +108,7 @@ wp plugin install ninja-forms ajax-thumbnail-rebuild intuitive-custom-post-order
 wp plugin install akismet wp-social-likes gotmls rest-api
 
 # Update and activate private plugins
-wp plugin activate wpmudev-updates wpmu-dev-seo wp-smush-pro google-analytics-async  wp-defender
+wp plugin activate wpmudev-updates wp-smush-pro google-analytics-async wp-defender wordpress-seo
 wp plugin update --all --quiet
 
 # Set final permissions
