@@ -101,7 +101,7 @@ rm -rf `find wp-content/themes -type d -name 'twenty*'`
 wp plugin delete hello
 
 # Install and activate plugins
-wp plugin install ninja-forms ajax-thumbnail-rebuild intuitive-custom-post-order enable-media-replace wp-social-likes wp-retina-2x tinymce-advanced force-strong-passwords cloudflare --activate
+wp plugin install ninja-forms ajax-thumbnail-rebuild intuitive-custom-post-order enable-media-replace wp-social-likes wp-retina-2x tinymce-advanced force-strong-passwords cloudflare wp-gallery-custom-links --activate
 
 # Install plugins but don't activate
 wp plugin install akismet w3-total-cache wp-social-likes gotmls rest-api
