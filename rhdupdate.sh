@@ -1,4 +1,11 @@
 #!/bin/bash
+
+#
+#
+# DO NOT CALL THIS SCRIPT DIRECTLY. Move to ~/scripts and edit directories to suit server
+#
+#
+
 export PATH="/home/gaswirth/npm/bin:/home/gaswirth/.npm/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games"
 
 for d in /home/joanna/public_html/*; do
