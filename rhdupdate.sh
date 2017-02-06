@@ -8,6 +8,8 @@ export PATH="/home/gaswirth/npm/bin:/home/gaswirth/.npm/bin:/usr/local/sbin:/usr
 
 sudo -u gaswirth wp cli update --stable --yes
 
+echo -n `date + d%/%m/%Y\ %H:%M:%S`;
+
 for D in /var/www/public_html/*; do
         if [ -d $D ]
         then
@@ -15,9 +17,9 @@ for D in /var/www/public_html/*; do
                 CONT="${DIR}/wp-content"
                 echo "SITE: ${D}"
                 chown -R www-data:www-data ${CONT} && chmod -R 775 ${CONT}
-                sudo -u gaswirth -i -- wp plugin update --all --path=${DIR} --quiet
+                sudo -u gaswirth -i -- wp plugin update --all --path=${DIR}
                 sudo -u gaswirth -i -- wp theme update --all --path=${DIR} --quiet
-                sudo -u gaswirth -i -- wp core update --path=${DIR} --quiet
+                sudo -u gaswirth -i -- wp core update --path=${DIR}
                 chown -R www-data:www-data ${CONT} && chmod -R 775 ${CONT}
         fi
 done
