@@ -6,9 +6,9 @@
 
 export PATH="/home/gaswirth/npm/bin:/home/gaswirth/.npm/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games"
 
-sudo -u gaswirth wp cli update --stable --yes
+echo -n `date +%d/%m/%Y\ %H:%M:%S`;
 
-echo -n `date + d%/%m/%Y\ %H:%M:%S`;
+sudo -u gaswirth wp cli update --stable --yes
 
 for D in /var/www/public_html/*; do
         if [ -d $D ]
