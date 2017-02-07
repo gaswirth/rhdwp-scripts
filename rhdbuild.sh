@@ -92,6 +92,7 @@ cp -rv /home/gaswirth/resources/plugins/wpmudev/wp-defender wp-content/plugins/
 cp -rv /home/gaswirth/resources/plugins/wpmudev/wp-hummingbird wp-content/plugins
 cp -rv /home/gaswirth/resources/plugins/soliloquy wp-content/plugins
 cp -rv /home/gaswirth/resources/plugins/ninja-forms-mailchimp wp-content/plugins
+cp -rv /home/gaswirth/resources/plugins/ninja-forms/style wp-content/plugins
 
 # Set up mu-plugins directory
 mkdir wp-content/mu-plugins
@@ -108,7 +109,7 @@ wp plugin install ninja-forms ajax-thumbnail-rebuild intuitive-custom-post-order
 wp plugin install akismet social-pug wp-super-cache
 
 # Update and activate private plugins
-wp plugin activate wpmudev-updates wp-smush-pro google-analytics-async wp-defender
+wp plugin activate wpmudev-updates wp-smush-pro google-analytics-async wp-defender ninja-forms-style
 wp plugin update --all --quiet
 
 # Set final permissions
