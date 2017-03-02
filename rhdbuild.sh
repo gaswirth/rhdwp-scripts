@@ -91,7 +91,7 @@ cp -rv /home/gaswirth/resources/plugins/wpmudev/wp-smush-pro wp-content/plugins/
 cp -rv /home/gaswirth/resources/plugins/wpmudev/wp-defender wp-content/plugins/
 cp -rv /home/gaswirth/resources/plugins/wpmudev/wp-hummingbird wp-content/plugins
 cp -rv /home/gaswirth/resources/plugins/soliloquy wp-content/plugins
-cp -rv /home/gaswirth/resources/plugins/ninja-forms-mailchimp wp-content/plugins
+cp -rv /home/gaswirth/resources/plugins/ninja-forms-mail-chimp wp-content/plugins
 cp -rv /home/gaswirth/resources/plugins/ninja-forms/style wp-content/plugins
 
 # Set up mu-plugins directory
