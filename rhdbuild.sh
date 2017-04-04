@@ -43,6 +43,7 @@ if (!empty(\$_SERVER['HTTP_X_FORWARDED_PROTO']) && \$_SERVER['HTTP_X_FORWARDED_P
 define( 'EMPTY_TRASH_DAYS', 30 );
 define( 'WP_MEMORY_LIMIT', '96M' );
 define( 'WP_MAX_MEMORY_LIMIT', '256M' );
+define( 'WP_AUTO_UPDATE_CORE', true );
 PHP
 
 wp core install --url="http://dev.roundhouse-designs.com/${DEVDIR}" --title="$TITLE" --admin_user="nick" --admin_password="H961CxwzdYymwIelIRQm" --admin_email="nick@roundhouse-designs.com"
