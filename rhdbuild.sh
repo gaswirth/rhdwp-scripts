@@ -93,6 +93,7 @@ cp -rv /home/gaswirth/resources/plugins/wpmudev/wp-hummingbird wp-content/plugin
 cp -rv /home/gaswirth/resources/plugins/soliloquy wp-content/plugins
 cp -rv /home/gaswirth/resources/plugins/ninja-forms-mail-chimp wp-content/plugins
 cp -rv /home/gaswirth/resources/plugins/ninja-forms/style wp-content/plugins
+cp -rv /home/gaswirth/resources/plugins/social-pug wp-content/plugins
 
 # Set up mu-plugins directory
 mkdir wp-content/mu-plugins
@@ -106,7 +107,7 @@ wp plugin delete hello
 wp plugin install ninja-forms ajax-thumbnail-rebuild intuitive-custom-post-order enable-media-replace  wp-retina-2x tinymce-advanced force-strong-passwords wordpress-seo remove-http --activate
 
 # Install plugins but don't activate
-wp plugin install akismet social-pug wp-super-cache
+wp plugin install akismet wp-super-cache
 
 # Update and activate private plugins
 wp plugin activate wpmudev-updates wp-smush-pro google-analytics-async wp-defender ninja-forms-style
