@@ -95,9 +95,10 @@ cp -rv /home/gaswirth/resources/plugins/ninja-forms-mail-chimp wp-content/plugin
 cp -rv /home/gaswirth/resources/plugins/ninja-forms-style wp-content/plugins
 cp -rv /home/gaswirth/resources/plugins/social-pug wp-content/plugins
 
-# Set up mu-plugins directory
+# Set up mu-plugins directory and install plugins
 mkdir wp-content/mu-plugins
 git clone git@github.com:gaswirth/rhdwp-mu-loader.git wp-content/mu-plugins
+git clone git@github.com:gaswirth/rhdwp-social-icons.git wp-content/mu-plugins/rhd-social-icons
 
 # Get rid of built-in themes and unwanted plugins
 rm -rf `find wp-content/themes -type d -name 'twenty*'`
@@ -115,9 +116,8 @@ wp plugin update --all --quiet
 
 # Set final permissions
 cd "$DEVPATH"
-sudo find . -type f -exec chmod 664 {} \;
-sudo find . -type d -exec chmod 774 {} \;
-sudo chmod -R 775 wp-content
+sudo chmod -R 664
+sudo find . -type d -exec chmod 775 {} \;
 sudo chown -R www-data:www-data .
 
 echo '---------------------------------'
