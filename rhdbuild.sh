@@ -116,7 +116,7 @@ wp plugin update --all --quiet
 
 # Set final permissions
 cd "$DEVPATH"
-sudo chmod -R 664
+sudo chmod -R 664 *
 sudo find . -type d -exec chmod 775 {} \;
 sudo chown -R www-data:www-data .
 
