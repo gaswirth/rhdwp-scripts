@@ -88,7 +88,6 @@ cd "$DEVPATH"
 cp -rv /home/gaswirth/resources/plugins/wpmudev/wpmudev-updates wp-content/plugins/
 cp -rv /home/gaswirth/resources/plugins/wpmudev/google-analytics-async wp-content/plugins/
 cp -rv /home/gaswirth/resources/plugins/wpmudev/wp-smush-pro wp-content/plugins/
-cp -rv /home/gaswirth/resources/plugins/wpmudev/wp-defender wp-content/plugins/
 cp -rv /home/gaswirth/resources/plugins/wpmudev/wp-hummingbird wp-content/plugins
 cp -rv /home/gaswirth/resources/plugins/soliloquy wp-content/plugins
 cp -rv /home/gaswirth/resources/plugins/ninja-forms-mail-chimp wp-content/plugins
@@ -108,10 +107,10 @@ wp plugin delete hello
 wp plugin install ninja-forms ajax-thumbnail-rebuild intuitive-custom-post-order enable-media-replace tinymce-advanced force-strong-passwords mobble --activate
 
 # Install plugins but don't activate
-# (nothing currently)
+wp plugin install wordfence
 
 # Update and activate private plugins
-wp plugin activate wpmudev-updates wp-smush-pro google-analytics-async wp-defender ninja-forms-style
+wp plugin activate wpmudev-updates wp-smush-pro google-analytics-async ninja-forms-style
 wp plugin update --all --quiet
 
 # Set final permissions
