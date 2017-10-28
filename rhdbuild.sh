@@ -20,10 +20,11 @@ echo "---------------------"
 echo "--- Here we go... ---"
 echo "---------------------"
 
-DIR=$(pwd)
-DEVPATH=/var/www/public_html/"$DEVDIR"
-mkdir "$DEVDIR"
-cd "$DEVDIR"
+#DIR=$(pwd)
+ROOTPATH=/var/www/public_html/
+DEVPATH="$ROOTPATH$DEVDIR"
+mkdir "$DEVPATH" && cd "$DEVPATH"
+pwd
 
 # MySQL Setup
 sudo mysql -u root -p"$DBROOTPASS" << EOF
@@ -35,10 +36,8 @@ EOF
 wp core download && wp core config --dbname="$DBNAME" --dbprefix="rhd_wp_" --dbuser="$DBUSER" --dbpass="$DBPASS" --extra-php << PHP 
 // ROUNDHOUSE DESIGNS CUSTOMIZATIONS
 define( 'WPLANG', '');
-define ( 'WP_DEBUG_LOG', true );
+define( 'WP_DEBUG_LOG', true );
 define( 'FORCE_SSL_ADMIN', true );
-if (!empty(\$_SERVER['HTTP_X_FORWARDED_PROTO']) && \$_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https')
-        \$_SERVER['HTTPS']='on';
 define( 'EMPTY_TRASH_DAYS', 30 );
 define( 'WP_MEMORY_LIMIT', '96M' );
 define( 'WP_MAX_MEMORY_LIMIT', '256M' );
@@ -68,7 +67,6 @@ cd wp-content/themes/rhd
 npm install grunt
 npm install --save-dev grunt-contrib-stylus grunt-contrib-watch grunt-contrib-jshint
 yarn init -y
-rm README.md
 
 # While we're still in wp-content, change SITEBASE placeholders to dev directory name for our Stylus vars
 # We'll also change the main site name in style.css
@@ -110,7 +108,7 @@ wp plugin install ninja-forms ajax-thumbnail-rebuild intuitive-custom-post-order
 wp plugin install wordfence
 
 # Update and activate private plugins
-wp plugin activate wpmudev-updates wp-smush-pro google-analytics-async ninja-forms-style
+wp plugin activate wpmudev-updates wp-smush-pro google-analytics-async
 wp plugin update --all --quiet
 
 # Set final permissions
