@@ -5,15 +5,14 @@ echo "---- Site basics ----"
 echo "---------------------"
 
 read -p "Site Title: " TITLE
-read -p "Dev directory: " DEVDIR
-read -p "Theme directory name: " THEMESLUG
+read -p "Dev directory/git repo name: " DEVDIR
+read -p "Theme directory name (with 'rhd' if necessary): " THEMESLUG
 read -p "Database name: " DBNAME
 read -p "Database user: " DBUSER
 read -s -p "Database password: " DBPASS
 echo ""
 read -s -p "MySQL Admin password: " DBROOTPASS
 echo ""
-read -p "Theme (scrolly/hannah/slideways): " THEME
 read -p "Branch: " BRANCH
 
 echo "---------------------"
@@ -55,15 +54,20 @@ wp user update nick --first_name="Nick" --last_name="Gaswirth"
 wp user update nick ryan --user_url="https://roundhouse-designs.com"
 
 # Install RHD theme
+git clone --bare git@github.com:gaswirth/rhdwp-hannah.git
+cd rhdwp-hannah.git
+git push --mirror git@github.com:gaswirth/rhd-"$DEVDIR".git
+cd ..
+rm -rf rhdwp-hannah.git
+
 if [ -z "$BRANCH" ]
-then
-	git clone git@github.com:gaswirth/rhdwp-"$THEME".git wp-content/themes/rhd
+	git clone git@github.com:gaswirth/rhdwp-hannah.git wp-content/themes/"$DEVDIR"
 else
-	git clone -b "$BRANCH" git@github.com:gaswirth/rhdwp-"$THEME".git wp-content/themes/rhd
+	git clone -b "$BRANCH" git@github.com:gaswirth/rhdwp-hannah.git wp-content/themes/"$DEVDIR"
 fi
 
 # Perform theme directory actions
-cd wp-content/themes/rhd
+cd wp-content/themes/"$DEVDIR"
 npm install grunt
 npm install --save-dev grunt-contrib-stylus grunt-contrib-watch grunt-contrib-jshint
 yarn init -y
@@ -72,7 +76,8 @@ yarn init -y
 # We'll also change the main site name in style.css
 # then generate some base stylesheets
 sed -i 's/SITEBASE/"$DEVDIR"/g' stylus/partials/_global.styl
-sed -ri "s/Theme Name: (.*?)/Theme Name: RHD $TITLE/g" style.css
+sed -ri "s/Theme Name: (.*?)/Theme Name: RHD $TITLE/" style.css
+sed -ri "s/Description: (.*?)/Description: A custom WordPress theme for $TITLE/" style.css
 grunt stylus:dev
 
 # Rename the theme directory, activate the theme, and create the primary nav menu
