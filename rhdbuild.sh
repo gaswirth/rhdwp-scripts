@@ -1,11 +1,11 @@
 #!/bin/bash
 
-echo "---------------------"
-echo "---- Site basics ----"
-echo "---------------------"
+echo "***************"
+echo "* Site basics *"
+echo "***************"
 
 read -p "Site Title: " TITLE
-read -p "Dev directory/git repo name: " DEVDIR
+read -p "Dev directory/git repo name: " PROJNAME
 read -p "Theme directory name (with 'rhd' if necessary): " THEMESLUG
 read -p "Database name: " DBNAME
 read -p "Database user: " DBUSER
@@ -14,15 +14,15 @@ echo ""
 read -s -p "MySQL Admin password: " DBROOTPASS
 echo ""
 read -p "Branch: " BRANCH
-
-echo "---------------------"
-echo "--- Here we go... ---"
-echo "---------------------"
+read -n 1 -s -r -p "Please create a `$PROJNAME` GitHub repo, then press any key to continue..."
+echo "*****************"
+echo "* Rock and roll *"
+echo "****************"
 
 #DIR=$(pwd)
 ROOTPATH=/var/www/public_html/
-DEVPATH="$ROOTPATH$DEVDIR"
-mkdir "$DEVPATH" && cd "$DEVPATH"
+DEVPATHFULL="$ROOTPATH$PROJNAME"
+mkdir "$DEVPATHFULL" && cd "$DEVPATHFULL"
 pwd
 
 # MySQL Setup
@@ -43,7 +43,7 @@ define( 'WP_MAX_MEMORY_LIMIT', '256M' );
 define( 'WP_AUTO_UPDATE_CORE', true );
 PHP
 
-wp core install --url="http://dev.roundhouse-designs.com/${DEVDIR}" --title="$TITLE" --admin_user="nick" --admin_password="H961CxwzdYymwIelIRQm" --admin_email="nick@roundhouse-designs.com"
+wp core install --url="http://dev.roundhouse-designs.com/${PROJNAME}" --title="$TITLE" --admin_user="nick" --admin_password="H961CxwzdYymwIelIRQm" --admin_email="nick@roundhouse-designs.com"
 
 wp rewrite structure '/%postname%/'
 wp rewrite flush --hard
@@ -53,31 +53,30 @@ wp user create ryan ryan@roundhouse-designs.com --role="administrator" --first_n
 wp user update nick --first_name="Nick" --last_name="Gaswirth"
 wp user update nick ryan --user_url="https://roundhouse-designs.com"
 
-# Install RHD theme
-git clone --bare git@github.com:gaswirth/rhdwp-hannah.git
-cd rhdwp-hannah.git
-git push --mirror git@github.com:gaswirth/rhd-"$DEVDIR".git
+# Install RHD theme and push to new repo
+git clone --bare git@github.com:gaswirth/rhdwp-hannah.git wp-content/themes/rhdwp-hannah.git
+cd wp-content/themes/rhdwp-hannah.git
+git push --mirror git@github.com:gaswirth/"$PROJNAME".git
 cd ..
 rm -rf rhdwp-hannah.git
 
+# Clone new repo and prep for development
 if [ -z "$BRANCH" ]
-	git clone git@github.com:gaswirth/rhdwp-hannah.git wp-content/themes/"$DEVDIR"
+	git clone git@github.com:gaswirth/rhdwp-hannah.git "$PROJNAME"
 else
-	git clone -b "$BRANCH" git@github.com:gaswirth/rhdwp-hannah.git wp-content/themes/"$DEVDIR"
+	git clone -b "$BRANCH" git@github.com:gaswirth/rhdwp-hannah.git "$PROJNAME"
 fi
 
-# Perform theme directory actions
-cd wp-content/themes/"$DEVDIR"
+cd "$PROJNAME"
 npm install grunt
 npm install --save-dev grunt-contrib-stylus grunt-contrib-watch grunt-contrib-jshint
 yarn init -y
 
-# While we're still in wp-content, change SITEBASE placeholders to dev directory name for our Stylus vars
-# We'll also change the main site name in style.css
-# then generate some base stylesheets
-sed -i 's/SITEBASE/"$DEVDIR"/g' stylus/partials/_global.styl
+# While we're still in wp-content, change SITEBASE placeholders to dev directory name for Stylus vars
+# We'll also change the main site name in style.css and generate some base stylesheets
+sed -i 's/SITEBASE/"$PROJNAME"/g' stylus/partials/_global.styl
 sed -ri "s/Theme Name: (.*?)/Theme Name: RHD $TITLE/" style.css
-sed -ri "s/Description: (.*?)/Description: A custom WordPress theme for $TITLE/" style.css
+sed -ri "s/Description: (.*?)/Description: A custom WordPress theme for $TITLE by Roundhouse Designs/" style.css
 grunt stylus:dev
 
 # Rename the theme directory, activate the theme, and create the primary nav menu
@@ -85,7 +84,7 @@ cd .. && mv rhd "$THEMESLUG"
 wp theme activate "$THEMESLUG"
 wp menu create "Site Navigation"
 wp menu location assign "Site Navigation" primary
-cd "$DEVPATH"
+cd "$DEVPATHFULL"
 
 # Install WPMUDEV + Dashboard
 cp -rv /home/gaswirth/resources/plugins/wpmudev-updates wp-content/plugins/
@@ -117,11 +116,11 @@ wp plugin activate wpmudev-updates wp-smush-pro google-analytics-async
 wp plugin update --all --quiet
 
 # Set final permissions
-cd "$DEVPATH"
+cd "$DEVPATHFULL"
 sudo chmod -R 664 *
 sudo find . -type d -exec chmod 775 {} \;
 sudo chown -R www-data:www-data .
 
-echo '---------------------------------'
+echo '******------------'
 echo '------ You did it, tiger!! ------'
-echo '---------------------------------'
+echo '******------------'
