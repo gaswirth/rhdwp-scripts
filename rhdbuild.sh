@@ -1,42 +1,36 @@
 #!/bin/bash
 
-echo "***************"
-echo "* Site basics *"
-echo "***************"
+echo "*****************"
+echo "** Site basics **"
+echo "*****************"
 
 read -p "Site Title: " TITLE
-read -p "Dev directory/repo name: " PROJNAME
-read -p "Append 'rhd' prefix Y/n? " RHDPREFIX
-read -p "Theme directory name (with 'rhd' if necessary): " THEMESLUG
+read -p "Site directory/repo name (without 'rhd' prefix): " PROJNAME
+REPONAME="rhd-$PROJNAME"
+read -p "Theme directory name ('rhd' prefix ok): " THEMEDIR
+echo "*****************"
 read -p "Database name: " DBNAME
 read -p "Database user: " DBUSER
 read -s -p "Database password: " DBPASS
 echo ""
-read -s -p "MySQL Admin password: " DBROOTPASS
+echo "*****************"
+read -p "Branch: " BRANCH
+read -n 1 -s -r -p "Please create a '$REPONAME' GitHub repo, then press any key to continue..."
 echo ""
 
-# add 'rhd' prefix if selected
-case $RHDPREFIX in
-    [yY][eE][sS]|[yY])
-	projname="rhd-$PROJNAME"
-	echo "test: $PROJNAME"
-	;;
-esac	
+echo "*******************"
+echo "** Rock and roll **"
+echo "******************"
 
-read -p "Branch: " BRANCH
-read -n 1 -s -r -p "Please create a `$PROJNAME` GitHub repo, then press any key to continue..."
-echo "*****************"
-echo "* Rock and roll *"
-echo "****************"
-
-#DIR=$(pwd)
 ROOTPATH=/var/www/public_html/
 DEVPATHFULL="$ROOTPATH$PROJNAME"
-mkdir "$DEVPATHFULL" && cd "$DEVPATHFULL"
+mkdir "$DEVPATHFULL"
+cd "$DEVPATHFULL"
 pwd
 
 # MySQL Setup
-sudo mysql -u root -p"$DBROOTPASS" << EOF
+echo "mySQL"
+sudo mysql -u root -p << EOF
 CREATE DATABASE $DBNAME;
 GRANT ALL PRIVILEGES ON $DBNAME.* TO "$DBUSER"@'localhost' IDENTIFIED BY '$DBPASS';
 FLUSH PRIVILEGES;
@@ -58,40 +52,36 @@ wp core install --url="http://dev.roundhouse-designs.com/${PROJNAME}" --title="$
 wp rewrite structure '/%postname%/'
 wp rewrite flush --hard
 
-# Finish user creation
-wp user create ryan ryan@roundhouse-designs.com --role="administrator" --first_name="Ryan" --last_name="Foy" --send-email
-wp user update nick --first_name="Nick" --last_name="Gaswirth"
-wp user update nick ryan --user_url="https://roundhouse-designs.com"
-
-# Install RHD theme and push to new repo
-git clone --bare git@github.com:gaswirth/rhdwp-hannah.git wp-content/themes/rhdwp-hannah.git
-cd wp-content/themes/rhdwp-hannah.git
-git push --mirror git@github.com:gaswirth/"$PROJNAME".git
+# Clone RHD Hannah and mirror to new repo
+cd wp-content/themes
+git clone --bare git@github.com:gaswirth/rhdwp-hannah.git
+cd rhdwp-hannah.git
+git push --mirror git@github.com:gaswirth/"$REPONAME".git
 cd ..
 rm -rf rhdwp-hannah.git
 
 # Clone new repo and prep for development
 if [ -z "$BRANCH" ]
-	git clone git@github.com:gaswirth/rhdwp-hannah.git "$PROJNAME"
+then
+	git clone git@github.com:gaswirth/"$REPONAME" "$THEMEDIR"
 else
-	git clone -b "$BRANCH" git@github.com:gaswirth/rhdwp-hannah.git "$PROJNAME"
+	git clone -b "$BRANCH" git@github.com:gaswirth/"$REPONAME" "$THEMEDIR"
 fi
 
-cd "$PROJNAME"
+cd "$THEMEDIR"
 npm install grunt
 npm install --save-dev grunt-contrib-stylus grunt-contrib-watch grunt-contrib-jshint
 yarn init -y
 
 # While we're still in wp-content, change SITEBASE placeholders to dev directory name for Stylus vars
 # We'll also change the main site name in style.css and generate some base stylesheets
-sed -i 's/SITEBASE/"$PROJNAME"/g' stylus/partials/_global.styl
+sed -i 's/SITEBASE/"$PROJNAME"/g' assets/stylus/global.styl
 sed -ri "s/Theme Name: (.*?)/Theme Name: RHD $TITLE/" style.css
 sed -ri "s/Description: (.*?)/Description: A custom WordPress theme for $TITLE by Roundhouse Designs/" style.css
 grunt stylus:dev
 
-# Rename the theme directory, activate the theme, and create the primary nav menu
-cd .. && mv rhd "$THEMESLUG"
-wp theme activate "$THEMESLUG"
+# Activate the theme, and create the primary nav menu
+wp theme activate "$THEMEDIR"
 wp menu create "Site Navigation"
 wp menu location assign "Site Navigation" primary
 cd "$DEVPATHFULL"
@@ -119,11 +109,16 @@ wp plugin delete hello
 wp plugin install ninja-forms ajax-thumbnail-rebuild intuitive-custom-post-order enable-media-replace tinymce-advanced force-strong-passwords mobble --activate
 
 # Install plugins but don't activate
-wp plugin install wordfence
+# (Nothing yet...)
 
 # Update and activate private plugins
 wp plugin activate wpmudev-updates wp-smush-pro google-analytics-async
 wp plugin update --all --quiet
+
+# Finish user creation
+wp user create ryan ryan@roundhouse-designs.com --role="administrator" --first_name="Ryan" --last_name="Foy" --send-email
+wp user update nick --first_name="Nick" --last_name="Gaswirth"
+wp user update nick ryan --user_url="https://roundhouse-designs.com"
 
 # Set final permissions
 cd "$DEVPATHFULL"
