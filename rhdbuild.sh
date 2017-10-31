@@ -5,7 +5,8 @@ echo "* Site basics *"
 echo "***************"
 
 read -p "Site Title: " TITLE
-read -p "Dev directory/git repo name: " PROJNAME
+read -p "Dev directory/repo name: " PROJNAME
+read -p "Append 'rhd' prefix Y/n? " RHDPREFIX
 read -p "Theme directory name (with 'rhd' if necessary): " THEMESLUG
 read -p "Database name: " DBNAME
 read -p "Database user: " DBUSER
@@ -13,6 +14,15 @@ read -s -p "Database password: " DBPASS
 echo ""
 read -s -p "MySQL Admin password: " DBROOTPASS
 echo ""
+
+# add 'rhd' prefix if selected
+case $RHDPREFIX in
+    [yY][eE][sS]|[yY])
+	projname="rhd-$PROJNAME"
+	echo "test: $PROJNAME"
+	;;
+esac	
+
 read -p "Branch: " BRANCH
 read -n 1 -s -r -p "Please create a `$PROJNAME` GitHub repo, then press any key to continue..."
 echo "*****************"
