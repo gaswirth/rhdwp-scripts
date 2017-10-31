@@ -80,10 +80,11 @@ sed -ri "s/Theme Name: (.*?)/Theme Name: RHD $TITLE/" style.css
 sed -ri "s/Description: (.*?)/Description: A custom WordPress theme for $TITLE by Roundhouse Designs/" style.css
 grunt stylus:dev
 
-# Activate the theme, and create the primary nav menu
+# Activate the theme, create the primary nav menu, and add the Sample Page for display
 wp theme activate "$THEMEDIR"
 wp menu create "Site Navigation"
 wp menu location assign "Site Navigation" primary
+wp menu item add-post 2 --title="Sample"
 cd "$DEVPATHFULL"
 
 # Install WPMUDEV + Dashboard
