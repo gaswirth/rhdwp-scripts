@@ -72,7 +72,7 @@ cd "$THEMEDIR"
 
 # Initialize Yarn and install Grunt + dependencies
 yarn init
-yarn add --save-dev --modules-folder assets/node_modules grunt grunt-contrib-stylus grunt-contrib-watch grunt-contrib-jshint
+yarn add --dev  grunt grunt-contrib-stylus grunt-contrib-watch grunt-contrib-jshint
 yarn install
 
 # While we're still in the theme dir, change SITEBASE placeholders to dev directory name for Stylus vars
