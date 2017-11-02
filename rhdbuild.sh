@@ -54,7 +54,7 @@ wp rewrite flush --hard
 
 # Clone RHD Hannah and mirror to new repo
 cd wp-content/themes
-git clone --bare git@github.com:gaswirth/rhdwp-hannah.git
+git clone --bare --single-branch git@github.com:gaswirth/rhdwp-hannah.git
 cd rhdwp-hannah.git
 git push --mirror git@github.com:gaswirth/"$REPONAME".git
 cd ..
@@ -69,9 +69,11 @@ else
 fi
 
 cd "$THEMEDIR"
-npm install grunt
-npm install --save-dev grunt-contrib-stylus grunt-contrib-watch grunt-contrib-jshint
-yarn init -y
+
+# Initialize Yarn and install Grunt + dependencies
+yarn init
+yarn add --save-dev --modules-folder assets/node_modules grunt grunt-contrib-stylus grunt-contrib-watch grunt-contrib-jshint
+yarn install
 
 # While we're still in wp-content, change SITEBASE placeholders to dev directory name for Stylus vars
 # We'll also change the main site name in style.css and generate some base stylesheets
