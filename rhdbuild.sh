@@ -75,7 +75,7 @@ yarn init
 yarn add --save-dev --modules-folder assets/node_modules grunt grunt-contrib-stylus grunt-contrib-watch grunt-contrib-jshint
 yarn install
 
-# While we're still in wp-content, change SITEBASE placeholders to dev directory name for Stylus vars
+# While we're still in the theme dir, change SITEBASE placeholders to dev directory name for Stylus vars
 # We'll also change the main site name in style.css and generate some base stylesheets
 sed -i 's/SITEBASE/"$PROJNAME"/g' assets/stylus/global.styl
 sed -ri "s/Theme Name: (.*?)/Theme Name: RHD $TITLE/" style.css
@@ -129,6 +129,6 @@ sudo chmod -R 664 *
 sudo find . -type d -exec chmod 775 {} \;
 sudo chown -R www-data:www-data .
 
-echo '******------------'
-echo '------ You did it, tiger!! ------'
-echo '******------------'
+echo "**********************"
+echo "** Good work, tiger **"
+echo "**********************"
