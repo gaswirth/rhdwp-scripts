@@ -52,6 +52,39 @@ wp core install --url="http://dev.roundhouse-designs.com/${PROJNAME}" --title="$
 wp rewrite structure '/%postname%/'
 wp rewrite flush --hard
 
+# .htaccess hardening
+cat > .htaccess <<EOL
+<files wp-config.php>
+order allow,deny
+deny from all
+</files>
+EOL
+
+# wp-includes/.htaccess hardening
+cat > wp-includes/.htaccess <<EOL
+# Block the include-only files.
+<IfModule mod_rewrite.c>
+RewriteEngine On
+RewriteBase /
+RewriteRule ^wp-admin/includes/ - [F,L]
+RewriteRule !^wp-includes/ - [S=3]
+RewriteRule ^wp-includes/[^/]+\.php$ - [F,L]
+RewriteRule ^wp-includes/js/tinymce/langs/.+\.php - [F,L]
+RewriteRule ^wp-includes/theme-compat/ - [F,L]
+</IfModule>
+# BEGIN WordPress
+EOL
+
+# wp-content/uploads/.htaccess hardening
+mkdir wp-content/uploads
+cat > wp-content/uploads/.htaccess <<EOL
+# Kill PHP Execution
+<Files ~ "\.ph(?:p[345]?|t|tml)$">
+   deny from all
+</Files>
+EOL
+
+
 # Clone RHD Hannah and mirror to new repo
 cd wp-content/themes
 git clone --bare --single-branch git@github.com:gaswirth/rhdwp-hannah.git
