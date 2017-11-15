@@ -109,7 +109,7 @@ rm -rf `find wp-content/themes -type d -name 'twenty*'`
 wp plugin delete hello
 
 # Install and activate plugins
-wp plugin install ninja-forms ajax-thumbnail-rebuild enable-media-replace tinymce-advanced force-strong-passwords mobble --activate
+wp plugin install ninja-forms ajax-thumbnail-rebuild enable-media-replace tinymce-advanced force-strong-passwords schema --activate
 
 # Install plugins but don't activate
 # (Nothing yet...)
