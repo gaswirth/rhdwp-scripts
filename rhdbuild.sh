@@ -97,7 +97,6 @@ cp -rv /home/gaswirth/resources/plugins/wp-hummingbird wp-content/plugins
 cp -rv /home/gaswirth/resource/plugins/wp-defender wp-content/plugins
 cp -rv /home/gaswirth/resources/plugins/soliloquy wp-content/plugins
 cp -rv /home/gaswirth/resources/plugins/ninja-forms-mail-chimp wp-content/plugins
-cp -rv /home/gaswirth/resources/plugins/social-pug wp-content/plugins
 
 # Set up mu-plugins directory and install plugins
 mkdir wp-content/mu-plugins
@@ -109,7 +108,7 @@ rm -rf `find wp-content/themes -type d -name 'twenty*'`
 wp plugin delete hello
 
 # Install and activate plugins
-wp plugin install ninja-forms ajax-thumbnail-rebuild enable-media-replace tinymce-advanced force-strong-passwords schema --activate
+wp plugin install ninja-forms ajax-thumbnail-rebuild enable-media-replace tinymce-advanced force-strong-passwords social-warfare schema --activate
 
 # Install plugins but don't activate
 # (Nothing yet...)
