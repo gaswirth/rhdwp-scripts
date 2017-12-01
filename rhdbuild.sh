@@ -68,7 +68,10 @@ else
 	git clone -b "$BRANCH" git@github.com:gaswirth/"$REPONAME" "$THEMEDIR"
 fi
 
+# Hook up Hannah upstream
 cd "$THEMEDIR"
+git remote add upstream https://github.com/gaswirth/rhdwp-hannah.git
+git push origin master
 
 # Initialize Yarn and install Grunt + dependencies
 yarn init
