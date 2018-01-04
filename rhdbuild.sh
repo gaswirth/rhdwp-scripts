@@ -104,7 +104,7 @@ cp -rv /home/gaswirth/resources/plugins/ninja-forms-mail-chimp wp-content/plugin
 # Set up mu-plugins directory and install plugins
 mkdir wp-content/mu-plugins
 git clone git@github.com:gaswirth/rhdwp-mu-loader.git wp-content/mu-plugins
-git clone git@github.com:gaswirth/rhdwp-social-icons.git wp-content/mu-plugins/rhd-social-icons
+git clone git@github.com:gaswirth/rhdwp-theme-addons.git wp-content/mu-plugins/rhd-theme-addons
 
 # Get rid of built-in themes and unwanted plugins
 rm -rf `find wp-content/themes -type d -name 'twenty*'`
