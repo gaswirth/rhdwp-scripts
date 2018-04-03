@@ -42,8 +42,8 @@ define( 'WPLANG', '');
 define( 'WP_DEBUG_LOG', true );
 define( 'FORCE_SSL_ADMIN', true );
 define( 'EMPTY_TRASH_DAYS', 30 );
-define( 'WP_MEMORY_LIMIT', '96M' );
-define( 'WP_MAX_MEMORY_LIMIT', '256M' );
+define( 'WP_MEMORY_LIMIT', '64M' );
+define( 'WP_MAX_MEMORY_LIMIT', '128M' );
 define( 'WP_AUTO_UPDATE_CORE', true );
 PHP
 
