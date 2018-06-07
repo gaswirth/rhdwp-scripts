@@ -8,7 +8,6 @@
 # <UDF name="db_user_password" Label="Create MySQL User Password" default="" example="User's password" />
 # <UDF name="domain" Label="Site Domain" example="Example: domain.com" default="default" />
 # <UDF name="interactive" Label="Interactive dpkg?" example="Y/N (default: N)" default="" />
-# <UDF name="b2_password" Label="B2 Bucket password" /> 
 
 source <ssinclude StackScriptID="1">
 
@@ -81,8 +80,9 @@ function rhd_users_setup {
 
 
 function rhd_runme {
+	cd /home/gaswirth
 	wget https://raw.githubusercontent.com/gaswirth/rhdwp-scripts/forked-repos/runme.sh
-	chmod +x /home/gaswirth/runme.sh
+	chmod +x runme.sh
 }
 
 
@@ -143,7 +143,7 @@ function rhd_environment_setup {
 	# sed -i -e "s/AllowOverride None/AllowOverride All/g" /etc/apache2/apache2.conf
 	
 	# PHP + MySQL
-	apt install -y php7.0 libapache2-mod-php7.0 php7.0-mysql php-memcached memcached
+	apt install -y php7.1 libapache2-mod-php7.1 php7.1-mysql php7.1-memcached php7.1-json php7.1-mcrypt php7.1-mbstring
 	
 	# MySQL
 	if [ ! -z "$DB_PASSWORD" ]; then
