@@ -79,7 +79,7 @@ function rhd_users_setup {
 }
 
 
-function rhd_runme {
+function rhd_runme_script {
 	cd /home/gaswirth
 	wget https://raw.githubusercontent.com/gaswirth/rhdwp-scripts/forked-repos/runme.sh
 	chmod +x runme.sh
@@ -123,7 +123,7 @@ function rhd_cron_setup {
 		* */6 * * * bash /home/gaswirth/scripts/restic-backup.sh >/dev/null 2>&1
 	EOF
 	
-	rhd_runme
+	rhd_runme_script
 }
 
 
