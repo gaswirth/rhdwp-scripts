@@ -106,6 +106,15 @@ function rhd_cron_setup {
 	chmod 700 /usr/local/bin/restic
 	chown gaswirth:gaswirth /usr/local/bin/restic
 	
+	# mysqldump 
+	cat > /home/gaswirth/.my.cnf <<- EOF
+        [mysqldump]
+        user=root
+        password="$DB_PASSWORD"
+	EOF
+	chown gaswirth:gaswirth /home/gaswirth/.my.cnf
+	chmod 600 /home/gaswirth/.my.cnf
+	
 	# Cron
 	
 	# root
