@@ -102,9 +102,9 @@ function rhd_cron_setup {
 	cd /tmp
 	wget https://github.com/restic/restic/releases/download/v0.9.0/restic_0.9.0_linux_amd64.bz2
 	bunzip2 restic_0.9.0_linux_amd64.bz2
-	sudo mv restic_0.9.0_linux_amd64 /usr/local/bin/restic
-	sudo chmod 700 /usr/local/bin/restic
-	sudo chown gaswirth:gaswirth /usr/local/bin/restic
+	mv restic_0.9.0_linux_amd64 /usr/local/bin/restic
+	chmod 700 /usr/local/bin/restic
+	chown gaswirth:gaswirth /usr/local/bin/restic
 	
 	# Cron
 	
@@ -128,22 +128,21 @@ function rhd_cron_setup {
 
 
 function rhd_environment_setup {
-	# Apache2 + PHP 7 + Modules
-	apt install -y apache2 php-curl php-gd php-imagick php-mbstring php-mcrypt php-xml php-xmlrpc
+	# Apache2
+	apt install -y apache2
 	a2dissite 000-default.conf
 	rhd_apache_tune 40
 	mkdir /var/www/{public,log}
 	rm -rf /var/www/html
 	usermod -aG www-data gaswirth
 	
-	# Apache2 customizations
-	# TODO: ....fix this shit it don't work.
-	# 
-	# cp /etc/apache2/apache2.conf /etc/apache2/apache2.conf.bak
-	# sed -i -e "s/AllowOverride None/AllowOverride All/g" /etc/apache2/apache2.conf
+	# Apache2 AllowOverride All on /var/www
+	cp /etc/apache2/apache2.conf /etc/apache2/apache2.conf.bak
+	sed '/<Directory \/var\/www\/>/,/<\/Directory>/ s/AllowOverride All/AllowOverride None/' /etc/apache2/apache2.conf
 	
 	# PHP + MySQL
-	apt install -y php7.1 libapache2-mod-php7.1 php7.1-mysql php7.1-memcached php7.1-json php7.1-mcrypt php7.1-mbstring
+	add-apt-repository ppa:ondrej/php -y
+	apt install -y php7.1 libapache2-mod-php7.1 php7.1-mysql php7.1-memcached php7.1-json php7.1-mcrypt php7.1-mbstring php7.1-xml php7.1-xmlrpc php7.1-curl php7.1-gd php7.1-imagick
 	
 	# MySQL
 	if [ ! -z "$DB_PASSWORD" ]; then

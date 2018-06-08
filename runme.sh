@@ -26,16 +26,11 @@ read -s -p "Save the following B2 Bucket password in .restic: " BUCKETPASS
 echo "$BUCKETPASS" > .restic
 chmod 400 .restic
 
-echo "***********"
-echo "** TASKS **"
-echo "***********"
-
-echo "-----------"
-echo "PLEASE EDIT apache2.conf AND CHANGE AllowOverride None in /var/www/ vhost to AllowOverride All"
-echo "-----------"
+echo ""
+echo "----------------------"
 echo "PLEASE ADD public the following key to GitHub.com: $PUBKEY"
-echo "-----------"
-
+echo "----------------------"
+echo ""
 echo "*****************"
 echo " Done!"
 echo "*****************"
