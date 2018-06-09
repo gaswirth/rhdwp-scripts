@@ -76,6 +76,9 @@ function rhd_users_setup {
 	#foy
 	echo "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDTvprX8q2H13YwUtbtaIiBk6MT8is8cb4IJJitZQ3DrQ4IpmLulepxKFPdAqzUE2wxCfU8xmXzC2uIq/VGp02dbVOzT2bHyi9XAJTGX4s7hsVyACPXeSHW30dpdHYrLPbEBLx9TY7ODg/sZ/wLb7OAACglLHlxn7/KkRfWyS2XpCWjCzpLK2koC2NpvAFqyue18cBZ37Jm/fIArPiiYxV3JCzAfkStAf14iv4UjRZ0UyJqN2XCYML+Lplo2ltvSffRYTuFxrzszJNkfLuKVx5Gagx7V4P/+GYKpBLAmHpIKTQjEoIqxcA7kNfGOBIAWK21z9ZzlRQGnhO6kqXOPhur foy@Ryan-Foys-Macbook-Pro-2.local" > /home/foy/.ssh/authorized_keys
 	echo "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDnr84P+XxFziw1jz+UrJjxIp+1ORttNkJxUtmnsBIhyMJkub7OZwCfHsZzjp1rIsTx8lP0TPIR7yl77QZ0e/O9v6Jtc/De2UkI0vaoahjSmt6MEfezVuz+V0zh0VLBZ2GKzBEU2sNW8KqkVvgyeIASDLFMd57jJDk0UxPsTaShIbYDvzPrXId44z9J6r3BrmzFVFrt3CmF1LBaxNasyOXN46MURzQ/EPWAO8r99yvHrsNGmOGrC5HFdS5FXP2fgFttj9laERieQ4UAj5jSGyl7+mEtLaPP2tGDpHTsRCjMHM6O9JV62d8kuf9MPGnKuDQM+4Ifo3zlUv/9hCvFT9Y1 foy@Ryan-Foys-iMac.local" >> /home/foy/.ssh/authorized_keys
+	
+	# Kill SSH root login
+	ssh_disable_root
 }
 
 
@@ -262,10 +265,10 @@ function rhd_goodstuff {
 	apt autoclean
 	apt autoremove
 
-	# iTerm Shell Integration
+	# iTerm Shell Integration (macOS)
 	curl -L https://iterm2.com/misc/install_shell_integration.sh | bash
 	
-	# Ensure proper permissions
+	# Ensure proper permissions, just in case I fucked something up...
 	chown gaswirth:gaswirth /home/gaswirth
 	chown foy:foy /home/foy
 	
@@ -288,7 +291,6 @@ echo "$IPV6	$FQDN	$HOSTNAME" >> /etc/hosts
 # Roll it out
 rhd_initial_setup
 rhd_users_setup
-ssh_disable_root
 rhd_gaswirth_aliases
 rhd_environment_setup
 rhd_cron_setup
