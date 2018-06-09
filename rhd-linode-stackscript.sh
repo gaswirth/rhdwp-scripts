@@ -117,8 +117,7 @@ function rhd_cron_setup {
 	cp /home/gaswirth/.my.cnf /root/.my.cnf
 	chown root:root /root/.my.cnf
 	
-	# Cron
-	
+	# Cron jobs
 	# root
 	cat > /var/spool/cron/crontabs/root <<- EOF
 		0 0 1,15 * * letsencrypt renew --agree-tos --m admin@roundhouse-designs.com
@@ -286,13 +285,12 @@ hostnamectl set-hostname "$HOSTNAME"
 echo "$IP	$FQDN	$HOSTNAME" >> /etc/hosts
 echo "$IPV6	$FQDN	$HOSTNAME" >> /etc/hosts
 
+# Roll it out
 rhd_initial_setup
-
 rhd_users_setup
 ssh_disable_root
 rhd_gaswirth_aliases
 rhd_environment_setup
 rhd_cron_setup
 rhd_vhost_setup
-
 rhd_goodstuff
