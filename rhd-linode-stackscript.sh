@@ -128,7 +128,7 @@ function rhd_cron_setup {
 	EOF
 	
 	# gaswirth
-	cat > /var/spool/cron/crontabs/www-data <<- EOF
+	cat > /var/spool/cron/crontabs/gaswirth <<- EOF
 		* */6 * * * bash /home/gaswirth/scripts/restic-backup.sh >/dev/null 2>&1
 	EOF
 	
