@@ -108,28 +108,22 @@ function rhd_cron_setup {
 	
 	# mysqldump 
 	cat > /home/gaswirth/.my.cnf <<- EOF
-        [mysqldump]
-        user=root
-        password="$DB_PASSWORD"
+		[mysqldump]
+		user=root
+		password="$DB_PASSWORD"
 	EOF
 	chown gaswirth:gaswirth /home/gaswirth/.my.cnf
 	chmod 600 /home/gaswirth/.my.cnf
+	cp /home/gaswirth/.my.cnf /root/.my.cnf
+	chown root:root /root/.my.cnf
 	
 	# Cron
 	
 	# root
 	cat > /var/spool/cron/crontabs/root <<- EOF
 		0 0 1,15 * * letsencrypt renew --agree-tos --m admin@roundhouse-designs.com
-	EOF
-	
-	# www-data
-	cat > /var/spool/cron/crontabs/www-data <<- EOF
-		30 6 * * * /usr/local/bin/rhd_wp_helper/$HELPER
-	EOF
-	
-	# gaswirth
-	cat > /var/spool/cron/crontabs/gaswirth <<- EOF
 		* */6 * * * bash /home/gaswirth/scripts/restic-backup.sh >/dev/null 2>&1
+		30 6 * * * /usr/local/bin/rhd_wp_helper/$HELPER
 	EOF
 	
 	rhd_runme_script
