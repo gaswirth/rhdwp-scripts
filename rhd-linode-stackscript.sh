@@ -14,7 +14,7 @@ source <ssinclude StackScriptID="1">
 
 function rhd_initial_setup {
 	# System Updates (non-interactive)
-	if [ "$INTERACTIVE" = "y" ] || [ "$INTERACTIVE" = "Y" ]; then	
+	if [ "$INTERACTIVE" = "y" ] || [ "$INTERACTIVE" = "Y" ]; then
 		apt update -y
 		apt upgrade -y
 		apt dis-upgrade -y
