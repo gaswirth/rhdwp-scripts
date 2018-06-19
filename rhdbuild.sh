@@ -5,16 +5,15 @@ echo "** Site basics **"
 echo "*****************"
 
 read -p "Site Title: " TITLE
-read -p "Site directory/repo name (without 'rhd' prefix): " PROJNAME
+read -p "Site root (no namespace prefixes): " PROJNAME
 REPONAME="rhd-$PROJNAME"
-read -p "Theme directory name ('rhd' prefix ok): " THEMEDIR
+read -p "Theme directory name (namespace prefixes ok): " THEMEDIR
 echo "*****************"
 read -p "Database name: " DBNAME
 read -p "Database user: " DBUSER
 read -s -p "Database password: " DBPASS
 echo ""
 echo "*****************"
-read -p "Branch: " BRANCH
 read -n 1 -s -r -p "Please create a '$REPONAME' GitHub repo, then press any key to continue..."
 echo ""
 
@@ -22,21 +21,23 @@ echo "*******************"
 echo "** Rock and roll **"
 echo "******************"
 
-ROOTPATH=/var/www/public_html/
-DEVPATHFULL="$ROOTPATH$PROJNAME"
-mkdir "$DEVPATHFULL"
-cd "$DEVPATHFULL"
-pwd
-
-# MySQL Setup
+# MYSQL SETUP
 echo "mySQL"
-sudo mysql -u root -p << EOF
+mysql << EOF
 CREATE DATABASE $DBNAME;
 GRANT ALL PRIVILEGES ON $DBNAME.* TO "$DBUSER"@'localhost' IDENTIFIED BY '$DBPASS';
 FLUSH PRIVILEGES;
 EOF
 
-wp core download && wp core config --dbname="$DBNAME" --dbprefix="rhd_wp_" --dbuser="$DBUSER" --dbpass="$DBPASS" --extra-php << PHP 
+## SITE FILES
+ROOTPATH=/var/www/public_html/
+SITEROOT="$ROOTPATH$PROJNAME"
+mkdir "$SITEROOT"
+
+## WORDPRESS
+# Set up and install with wp-cli
+cd "$SITEROOT"
+wp core download --skip-content && wp core config --dbname="$DBNAME" --dbprefix="rhd_wp_" --dbuser="$DBUSER" --dbpass="$DBPASS" --extra-php << PHP 
 // ROUNDHOUSE DESIGNS CUSTOMIZATIONS
 define( 'WPLANG', '');
 define( 'WP_DEBUG_LOG', true );
@@ -49,33 +50,26 @@ PHP
 
 wp core install --url="http://dev.roundhouse-designs.com/${PROJNAME}" --title="$TITLE" --admin_user="nick" --admin_password="H961CxwzdYymwIelIRQm" --admin_email="nick@roundhouse-designs.com"
 
-wp rewrite structure '/%postname%/'
-wp rewrite flush --hard
-
 # Clone RHD Hannah and mirror to new repo
-cd wp-content/themes
-git clone --bare --single-branch git@github.com:gaswirth/rhdwp-hannah.git
-cd rhdwp-hannah.git
-git push --mirror git@github.com:gaswirth/"$REPONAME".git
-cd ..
-rm -rf rhdwp-hannah.git
+cd wp-content
+git clone -b wp-content --single-branch git@github.com:gaswirth/rhdwp-hannah.git rhdwp
+cd rhdwp
+mv * .. & cd ..
+rm -rf rhdwp
+git init
+git remote add origin git@github.com:gaswirth/"$REPONAME.git"
 
-# Clone new repo and prep for development
-if [ -z "$BRANCH" ]
-then
-	git clone git@github.com:gaswirth/"$REPONAME" "$THEMEDIR"
-else
-	git clone -b "$BRANCH" git@github.com:gaswirth/"$REPONAME" "$THEMEDIR"
-fi
+# Generate .htaccess and set rewrite structure
+wp rewrite flush --hard
+wp rewrite structure '/%postname%/'
 
-# Hook up Hannah upstream
-cd "$THEMEDIR"
-git remote add upstream https://github.com/gaswirth/rhdwp-hannah.git
-git push origin master
-
+## THEME
 # Initialize Yarn and install Grunt + dependencies
+mv themes/rhd-hannah themes/"$THEMEDIR" && cd themes/"$THEMEDIR"
+sed -ri "s/\"name\": \"rhdwp-hannah\"/\"name\": \"$REPONAME\"/" package.json
+sed -ri "s/rhdwp-hannah.git/$REPONAME/" package.json
 yarn init
-yarn add --dev  grunt grunt-contrib-stylus grunt-contrib-watch grunt-contrib-jshint
+yarn add grunt grunt-contrib-stylus grunt-contrib-watch grunt-contrib-jshint
 yarn install
 
 # While we're still in the theme dir, change SITEBASE placeholders to dev directory name for Stylus vars
@@ -90,7 +84,12 @@ wp theme activate "$THEMEDIR"
 wp menu create "Site Navigation"
 wp menu location assign "Site Navigation" primary
 wp menu item add-post 2 --title="Sample"
-cd "$DEVPATHFULL"
+
+# Make sure to "exit" back to the root dir.
+cd "$SITEROOT"
+
+## PLUGINS
+mkdir wp-content/plugins
 
 # Install WPMUDEV + Dashboard
 cp -rv /home/gaswirth/resources/plugins/wpmudev-updates wp-content/plugins/
@@ -100,27 +99,28 @@ cp -rv /home/gaswirth/resources/plugins/wp-hummingbird wp-content/plugins
 cp -rv /home/gaswirth/resource/plugins/wp-defender wp-content/plugins
 cp -rv /home/gaswirth/resources/plugins/soliloquy wp-content/plugins
 
-# Get rid of built-in themes and unwanted plugins
-rm -rf `find wp-content/themes -type d -name 'twenty*'`
-wp plugin delete hello
-
 # Install and activate plugins
 wp plugin install ajax-thumbnail-rebuild enable-media-replace tinymce-advanced force-strong-passwords social-warfare schema --activate
 
 # Install plugins but don't activate
-# (Nothing yet...)
+# (None by default)
 
 # Update and activate private plugins
 wp plugin activate wpmudev-updates wp-smush-pro google-analytics-async
 wp plugin update --all --quiet
 
+# Add installed plugins to the repo, commit changes, and push to remote
+cd wp-content/
+git add *
+git commit -m "Initial commit"
+git push -u origin master
+
 # Finish user creation
-wp user create ryan ryan@roundhouse-designs.com --role="administrator" --first_name="Ryan" --last_name="Foy" --send-email
+# wp user create ryan ryan@roundhouse-designs.com --role="administrator" --first_name="Ryan" --last_name="Foy" --send-email
 wp user update nick --first_name="Nick" --last_name="Gaswirth"
-wp user update nick ryan --user_url="https://roundhouse-designs.com"
+wp user update nick --user_url="https://roundhouse-designs.com" # ADD RYAN BACK IN
 
 # Set final permissions
-cd "$DEVPATHFULL"
 sudo chmod -R 664 *
 sudo find . -type d -exec chmod 775 {} \;
 sudo chown -R www-data:www-data .
