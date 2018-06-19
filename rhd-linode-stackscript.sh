@@ -124,7 +124,7 @@ function rhd_cron_setup {
 	# root
 	cat > /var/spool/cron/crontabs/root <<- EOF
 		0 0 1,15 * * letsencrypt renew --agree-tos --m admin@roundhouse-designs.com
-		* */6 * * * bash /home/gaswirth/scripts/restic-backup.sh >/dev/null 2>&1
+		0 */6 * * * bash /home/gaswirth/scripts/restic-backup.sh >/dev/null 2>&1
 	EOF
 	
 	# www-data
