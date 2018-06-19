@@ -1,4 +1,4 @@
-#!/bin/bash
+v#!/bin/bash
 
 echo "*****************"
 echo "** Site basics **"
@@ -38,7 +38,7 @@ mkdir "$SITEROOT"
 # Set up and install with wp-cli
 cd "$SITEROOT"
 wp core download --skip-content && wp core config --dbname="$DBNAME" --dbprefix="rhd_wp_" --dbuser="$DBUSER" --dbpass="$DBPASS" --extra-php << PHP 
-// ROUNDHOUSE DESIGNS CUSTOMIZATIONS
+/* Added by Roundhouse Designs */
 define( 'WPLANG', '');
 define( 'WP_DEBUG_LOG', true );
 define( 'FORCE_SSL_ADMIN', true );
@@ -46,6 +46,7 @@ define( 'EMPTY_TRASH_DAYS', 30 );
 define( 'WP_MEMORY_LIMIT', '64M' );
 define( 'WP_MAX_MEMORY_LIMIT', '128M' );
 define( 'WP_AUTO_UPDATE_CORE', true );
+*/ End Roundhouse Designs */
 PHP
 
 wp core install --url="http://dev.roundhouse-designs.com/${PROJNAME}" --title="$TITLE" --admin_user="nick" --admin_password="H961CxwzdYymwIelIRQm" --admin_email="nick@roundhouse-designs.com"
@@ -116,9 +117,9 @@ git commit -m "Initial commit"
 git push -u origin master
 
 # Finish user creation
-# wp user create ryan ryan@roundhouse-designs.com --role="administrator" --first_name="Ryan" --last_name="Foy" --send-email
+wp user create ryan ryan@roundhouse-designs.com --role="administrator" --first_name="Ryan" --last_name="Foy" --send-email
 wp user update nick --first_name="Nick" --last_name="Gaswirth"
-wp user update nick --user_url="https://roundhouse-designs.com" # ADD RYAN BACK IN
+wp user update nick ryan --user_url="https://roundhouse-designs.com"
 
 # Set final permissions
 sudo chmod -R 664 *
