@@ -1,4 +1,4 @@
-v#!/bin/bash
+#!/bin/bash
 
 echo "*****************"
 echo "** Site basics **"
@@ -38,20 +38,21 @@ mkdir "$SITEROOT"
 # Set up and install with wp-cli
 cd "$SITEROOT"
 wp core download --skip-content && wp core config --dbname="$DBNAME" --dbprefix="rhd_wp_" --dbuser="$DBUSER" --dbpass="$DBPASS" --extra-php << PHP 
-/* Added by Roundhouse Designs */
+// Added by Roundhouse Designs
 define( 'WPLANG', '');
 define( 'WP_DEBUG_LOG', true );
 define( 'FORCE_SSL_ADMIN', true );
 define( 'EMPTY_TRASH_DAYS', 30 );
 define( 'WP_MEMORY_LIMIT', '64M' );
-define( 'WP_MAX_MEMORY_LIMIT', '128M' );
+define( 'WP_MAX_MEMORY_LIMIT', '96M' );
 define( 'WP_AUTO_UPDATE_CORE', true );
-*/ End Roundhouse Designs */
+// End Roundhouse Designs
 PHP
 
 wp core install --url="http://dev.roundhouse-designs.com/${PROJNAME}" --title="$TITLE" --admin_user="nick" --admin_password="H961CxwzdYymwIelIRQm" --admin_email="nick@roundhouse-designs.com"
 
 # Clone RHD Hannah and mirror to new repo
+read -n 1 -s -r -p "working dir: $(pwd)"
 cd wp-content
 git clone -b wp-content --single-branch git@github.com:gaswirth/rhdwp-hannah.git rhdwp
 cd rhdwp
@@ -103,8 +104,8 @@ cp -rv /home/gaswirth/resources/plugins/soliloquy wp-content/plugins
 # Install and activate plugins
 wp plugin install ajax-thumbnail-rebuild enable-media-replace tinymce-advanced force-strong-passwords social-warfare schema --activate
 
-# Install plugins but don't activate
-# (None by default)
+# Plugins for install only
+# (None)
 
 # Update and activate private plugins
 wp plugin activate wpmudev-updates wp-smush-pro google-analytics-async
