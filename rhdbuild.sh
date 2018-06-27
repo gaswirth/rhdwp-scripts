@@ -52,7 +52,6 @@ PHP
 wp core install --url="http://dev.roundhouse-designs.com/${PROJNAME}" --title="$TITLE" --admin_user="nick" --admin_password="H961CxwzdYymwIelIRQm" --admin_email="nick@roundhouse-designs.com"
 
 # Clone RHD Hannah and mirror to new repo
-read -n 1 -s -r -p "working dir: $(pwd)"
 cd wp-content
 git clone -b wp-content --single-branch git@github.com:gaswirth/rhdwp-hannah.git rhdwp
 cd rhdwp
