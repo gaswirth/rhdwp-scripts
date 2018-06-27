@@ -53,7 +53,7 @@ wp core install --url="http://dev.roundhouse-designs.com/${PROJNAME}" --title="$
 
 # Clone RHD Hannah and mirror to new repo
 cd wp-content
-git clone -b wp-content --single-branch git@github.com:gaswirth/rhdwp-hannah.git rhdwp
+git clone -b master --single-branch git@github.com:gaswirth/rhdwp-hannah.git rhdwp
 cd rhdwp
 mv * .. & cd ..
 rm -rf rhdwp
