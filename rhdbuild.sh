@@ -6,7 +6,6 @@ echo "*****************"
 
 read -p "Site Title: " TITLE
 read -p "Site root (no namespace prefixes): " PROJNAME
-REPONAME="rhd-$PROJNAME"
 read -p "Theme directory name (namespace prefixes ok): " THEMEDIR
 echo "*****************"
 read -p "Database name: " DBNAME
@@ -14,6 +13,7 @@ read -p "Database user: " DBUSER
 read -s -p "Database password: " DBPASS
 echo ""
 echo "*****************"
+read -p "GitHub repository name: " REPONAME
 read -n 1 -s -r -p "Please create a '$REPONAME' GitHub repo, then press any key to continue..."
 echo ""
 
