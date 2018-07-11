@@ -1,6 +1,0 @@
-cache/*
-log/*
-*.log
-backup/*
-backups/*
-*.bak

@@ -38,7 +38,7 @@ mkdir "$SITEROOT"
 # Set up and install with wp-cli
 cd "$SITEROOT"
 wp core download --skip-content && wp core config --dbname="$DBNAME" --dbprefix="rhd_wp_" --dbuser="$DBUSER" --dbpass="$DBPASS" --extra-php << PHP 
-// Added by Roundhouse Designs
+/* Added by Roundhouse Designs */
 define( 'WPLANG', '');
 define( 'WP_DEBUG_LOG', true );
 define( 'FORCE_SSL_ADMIN', true );
@@ -46,19 +46,21 @@ define( 'EMPTY_TRASH_DAYS', 30 );
 define( 'WP_MEMORY_LIMIT', '64M' );
 define( 'WP_MAX_MEMORY_LIMIT', '96M' );
 define( 'WP_AUTO_UPDATE_CORE', true );
-// End Roundhouse Designs
+/* End Roundhouse Designs */
 PHP
 
-wp core install --url="http://dev.roundhouse-designs.com/${PROJNAME}" --title="$TITLE" --admin_user="nick" --admin_password="H961CxwzdYymwIelIRQm" --admin_email="nick@roundhouse-designs.com"
-
 # Clone RHD Hannah and mirror to new repo
-cd wp-content
-git clone -b master --single-branch git@github.com:gaswirth/rhdwp-hannah.git rhdwp
-cd rhdwp
-mv * .. & cd ..
-rm -rf rhdwp
+mkdir wp-content && cd wp-content
+git clone -b master --single-branch git@github.com:gaswirth/rhdwp-hannah.git rhdtemp
+cd rhdtemp
+echo IN RHDTEMP ABOUT TO MOVE
+mv {themes,mu-plugins} .. & cd ..
+rm -rf rhdtemp
 git init
 git remote add origin git@github.com:gaswirth/"$REPONAME.git"
+
+# Complete WP install
+wp core install --url="http://dev.roundhouse-designs.com/${PROJNAME}" --title="$TITLE" --admin_user="nick" --admin_password="H961CxwzdYymwIelIRQm" --admin_email="nick@roundhouse-designs.com"
 
 # Generate .htaccess and set rewrite structure
 wp rewrite flush --hard
@@ -122,8 +124,8 @@ wp user update nick --first_name="Nick" --last_name="Gaswirth"
 wp user update nick ryan --user_url="https://roundhouse-designs.com"
 
 # Set final permissions
-sudo chmod -R 664 *
-sudo find . -type d -exec chmod 775 {} \;
+sudo chmod -R 664 .
+sudo find . -type d -name ".git" -prune -o -type d -exec chmod 775 {} \;
 sudo chown -R www-data:www-data .
 
 echo "**********************"
