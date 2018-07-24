@@ -26,7 +26,7 @@ function rhd_initial_setup {
 	fi
 	
 	# Essential installs
-	apt install -y postfix git ufw mailutils screen software-properties-common python-software-properties wget letsencrypt less
+	apt install -y postfix git ufw mailutils screen software-properties-common python-software-properties wget letsencrypt less man-db
 	
 	# Git setup
 	git config --global user.email "nick@roundhouse-designs.com"
@@ -151,6 +151,7 @@ function rhd_environment_setup {
 	
 	# PHP + MySQL
 	add-apt-repository ppa:ondrej/php -y
+	apt update
 	apt install -y php"${PHP_VER}" libapache2-mod-php"${PHP_VER}" php"${PHP_VER}"-mysql php"${PHP_VER}"-memcached php"${PHP_VER}"-json php"${PHP_VER}"-mcrypt php"${PHP_VER}"-mbstring php"${PHP_VER}"-xml php"${PHP_VER}"-xmlrpc php"${PHP_VER}"-curl php"${PHP_VER}"-gd php"${PHP_VER}"-imagick
 	
 	# MySQL
