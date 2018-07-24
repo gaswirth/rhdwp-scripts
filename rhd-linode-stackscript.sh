@@ -8,16 +8,16 @@
 # <UDF name="db_user_password" Label="Create MySQL User Password" default="" example="User's password" />
 # <UDF name="domain" Label="Site Domain" example="Example: domain.com" default="default" />
 # <UDF name="interactive" Label="Interactive dpkg?" example="Y/N (default: N)" default="" />
+# <UDF name="php_ver" Label="PHP Version" example="7.1 (default: 7.1)" default="7.1" />
 
 source <ssinclude StackScriptID="1">
-
 
 function rhd_initial_setup {
 	# System Updates (non-interactive)
 	if [ "$INTERACTIVE" = "y" ] || [ "$INTERACTIVE" = "Y" ]; then
-		apt update -y
-		apt upgrade -y
-		apt dis-upgrade -y
+		apt update
+		apt upgrade
+		apt dist-upgrade
 	else
 		export DEBIAN_FRONTEND=noninteractive
 		apt update -y
@@ -151,7 +151,7 @@ function rhd_environment_setup {
 	
 	# PHP + MySQL
 	add-apt-repository ppa:ondrej/php -y
-	apt install -y php7.1 libapache2-mod-php7.1 php7.1-mysql php7.1-memcached php7.1-json php7.1-mcrypt php7.1-mbstring php7.1-xml php7.1-xmlrpc php7.1-curl php7.1-gd php7.1-imagick
+	apt install -y php"${PHP_VER}" libapache2-mod-php"${PHP_VER}" php"${PHP_VER}"-mysql php"${PHP_VER}"-memcached php"${PHP_VER}"-json php"${PHP_VER}"-mcrypt php"${PHP_VER}"-mbstring php"${PHP_VER}"-xml php"${PHP_VER}"-xmlrpc php"${PHP_VER}"-curl php"${PHP_VER}"-gd php"${PHP_VER}"-imagick
 	
 	# MySQL
 	if [ ! -z "$DB_PASSWORD" ]; then
