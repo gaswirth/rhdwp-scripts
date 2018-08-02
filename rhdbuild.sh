@@ -68,9 +68,9 @@ wp rewrite structure '/%postname%/'
 ## THEME
 # Initialize Yarn and install Grunt + dependencies
 mv themes/rhd-hannah themes/"$THEMEDIR" && cd themes/"$THEMEDIR"
+yarn init
 sed -ri "s/\"name\": \"rhdwp-hannah\"/\"name\": \"$REPONAME\"/" package.json
 sed -ri "s/rhdwp-hannah.git/$REPONAME/" package.json
-yarn init
 yarn add grunt grunt-contrib-stylus grunt-contrib-watch grunt-contrib-jshint
 yarn install
 
@@ -123,6 +123,7 @@ wp user update nick --first_name="Nick" --last_name="Gaswirth"
 wp user update nick ryan --user_url="https://roundhouse-designs.com"
 
 # Set final permissions
+cde "$SITEROOT"
 sudo chmod -R 664 .
 sudo find . -type d -name ".git" -prune -o -type d -exec chmod 775 {} \;
 sudo chown -R www-data:www-data .
