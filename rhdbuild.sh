@@ -53,7 +53,6 @@ PHP
 mkdir wp-content && cd wp-content
 git clone -b master --single-branch git@github.com:gaswirth/rhdwp-hannah.git rhdtemp
 cd rhdtemp
-echo IN RHDTEMP ABOUT TO MOVE
 mv {themes,mu-plugins} .. & cd ..
 rm -rf rhdtemp
 git init
