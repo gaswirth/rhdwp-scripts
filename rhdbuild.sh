@@ -123,7 +123,7 @@ wp user update nick --first_name="Nick" --last_name="Gaswirth"
 wp user update nick ryan --user_url="https://roundhouse-designs.com"
 
 # Set final permissions
-cde "$SITEROOT"
+cd "$SITEROOT"
 sudo chmod -R 664 .
 sudo find . -type d -name ".git" -prune -o -type d -exec chmod 775 {} \;
 sudo chown -R www-data:www-data .
