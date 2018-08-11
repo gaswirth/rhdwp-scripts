@@ -54,18 +54,12 @@ PHP
 # Clone RHD Hannah and mirror to new repo
 echo "GitHub repository setup..."
 mkdir wp-content && cd wp-content
-if [ -z "$BRANCH" ]
-then
-	git clone -b master --single-branch git@github.com:gaswirth/rhdwp-hannah.git rhdtemp
-	mv rhdtemp/themes .
-	mv rhdtemp/mu-plugins .
-	git init
-	git remote add origin git@github.com:gaswirth/"$REPONAME".git
-else
-	git clone -b "$BRANCH" git@github.com:gaswirth/rhdwp-hannah.git rhdtemp
-	mv rhdtemp/themes .
-	mv rhdtemp/mu-plugins .
-fi
+
+git clone -b "$BRANCH" --single-branch git@github.com:gaswirth/rhdwp-hannah.git rhdtemp
+mv rhdtemp/themes .
+mv rhdtemp/mu-plugins .
+git init
+git remote add origin git@github.com:gaswirth/"$REPONAME".git
 rm -rf rhdtemp
 
 # Complete WP install
