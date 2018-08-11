@@ -126,7 +126,7 @@ wp plugin activate wpmudev-updates wp-smush-pro
 wp plugin update --all --quiet
 
 # Add installed plugins to the repo, commit changes, and push to remote
-cd wp-content/
+cd "$SITEROOT"/wp-content
 git add *
 git commit -m "Initial commit"
 git push -u origin master
