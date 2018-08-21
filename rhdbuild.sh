@@ -116,7 +116,7 @@ cp -rv /home/gaswirth/resource/plugins/wp-defender wp-content/plugins
 cp -rv /home/gaswirth/resources/plugins/soliloquy wp-content/plugins
 
 # Install and activate plugins
-wp plugin install ajax-thumbnail-rebuild enable-media-replace force-strong-passwords social-warfare schema --activate
+wp plugin install ajax-thumbnail-rebuild enable-media-replace force-strong-passwords social-warfare --activate
 
 # Plugins for install only
 # (None)
