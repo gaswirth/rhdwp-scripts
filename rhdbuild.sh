@@ -109,11 +109,11 @@ cd "$SITEROOT"
 echo "Installing plugins..."
 
 # Install WPMUDEV + Dashboard
-cp -rv /home/gaswirth/resources/plugins/wpmudev-updates wp-content/plugins/
-cp -rv /home/gaswirth/resources/plugins/wp-smush-pro wp-content/plugins/
-cp -rv /home/gaswirth/resources/plugins/wp-hummingbird wp-content/plugins
-cp -rv /home/gaswirth/resource/plugins/wp-defender wp-content/plugins
-cp -rv /home/gaswirth/resources/plugins/soliloquy wp-content/plugins
+cp -rv /var/www/public_html/sandbox/wp-content/plugins/wpmudev-updates wp-content/plugins/
+cp -rv /var/www/public_html/sandbox/wp-content/plugins/wp-smush-pro wp-content/plugins/
+cp -rv /var/www/public_html/sandbox/wp-content/plugins/wp-hummingbird wp-content/plugins
+cp -rv /var/www/public_html/sandbox/wp-content/plugins/wp-defender wp-content/plugins
+cp -rv /var/www/public_html/sandbox/wp-content/plugins/soliloquy wp-content/plugins
 
 # Install and activate plugins
 wp plugin install ajax-thumbnail-rebuild enable-media-replace force-strong-passwords social-warfare --activate
