@@ -6,7 +6,6 @@ echo "*****************"
 
 read -p "Site Title: " TITLE
 read -p "Site root (no namespace prefixes): " PROJNAME
-read -p "Child Theme name: " THEMENAME
 echo "*****************"
 read -p "Database name: " DBNAME
 read -p "Database user: " DBUSER
@@ -71,15 +70,6 @@ rm -rf twenty*
 
 # Download the RHDWP base
 git clone git@github.com:gaswirth/rhdwp.git rhdwp
-
-# Create the child theme
-wp scaffold child-theme "$THEMESLUG" --parent_theme=rhdwp --author="Roundhouse Designs" --author_uri=https://roundhouse-designs.com --theme_uri=https://github.com/gaswirth/"$REPONAME".git --activate
-cd "$THEMESDIR"/"$THEMESLUG"
-sed -i "s/$THEMESLUG/$THEMENAME/gI" style.css
-cp "$THEMESDIR"/rhdwp/Gruntfile.js .
-cp "$THEMESDIR"/rhdwp/.gitignore .
-mkdir css
-mkdir stylus
 
 # Yarn setup
 yarn config set init-license GPL-2.0
