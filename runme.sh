@@ -12,6 +12,8 @@ echo ""
 
 mkdir /home/gaswirth/scripts
 cd /home/gaswirth/scripts
+
+# Restic backups
 wget https://raw.githubusercontent.com/gaswirth/rhdwp-scripts/forked-repos/restic-backup.sh
 chmod u+x restic-backup.sh
 sudo chown gaswirth:gaswirth restic-backup.sh
@@ -25,6 +27,21 @@ touch .restic
 read -s -p "Save the following B2 Bucket password in .restic: " BUCKETPASS
 echo "$BUCKETPASS" > .restic
 chmod 400 .restic
+
+echo ""
+echo "----------------------"
+
+# SASL for memcached
+sudo apt-get install sasl2-bin -y
+sudo mkdir -p /etc/sasl2
+sudo cat > /etc/sasl2/memcached.conf <<- EOF
+	mech_list: plain
+	log_level: 5
+	sasldb_path: /etc/sasl2/memcached-sasldb2
+EOF
+sudo saslpasswd2 -a memcached -c -f /etc/sasl2/memcached-sasldb2 gaswirth
+sudo chown memcache:memcache /etc/sasl2/memcached-sasldb2
+sudo systemctl restart memcached
 
 echo ""
 echo "----------------------"
