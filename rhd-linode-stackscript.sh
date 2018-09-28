@@ -7,6 +7,7 @@
 # <UDF name="db_user" Label="Create MySQL User" default="" example="Optionally create this user" />
 # <UDF name="db_user_password" Label="Create MySQL User Password" default="" example="User's password" />
 # <UDF name="domain" Label="Site Domain" example="Example: domain.com" default="default" />
+# <UDF name="memcached" Label="Memcached?" example="Y/N (default: N)" default="" />
 # <UDF name="interactive" Label="Interactive dpkg?" example="Y/N (default: N)" default="" />
 # <UDF name="php_ver" Label="PHP Version" example="7.1 (default: 7.1)" default="7.1" />
 
@@ -26,12 +27,21 @@ function rhd_initial_setup {
 	fi
 	
 	# Essential installs
-	apt install -y postfix git ufw mailutils screen software-properties-common python-software-properties wget letsencrypt less man-db
+	apt install -y postfix git ufw mailutils screen software-properties-common python-software-properties wget letsencrypt less man-db clamav clamav-daemon
+	
+	# Ondrej PHP repo
+	add-apt-repository ppa:ondrej/php -y
+	apt update -y
 	
 	# Git setup
 	git config --global user.email "nick@roundhouse-designs.com"
 	git config --global user.name "Nick Gaswirth"
 	git config --global push.default simple
+	
+	# NPM
+	curl -sL https://deb.nodesource.com/setup_8.x | sudo bash -
+	apt install nodejs -y
+	npm install -g grunt-cli
 	
 	# Services
 	echo "postfix postfix/main_mailer_type select Internet Site" | debconf-set-selections
@@ -150,7 +160,6 @@ function rhd_environment_setup {
 	sed '/<Directory \/var\/www\/>/,/<\/Directory>/ s/AllowOverride All/AllowOverride None/' /etc/apache2/apache2.conf
 	
 	# PHP + MySQL
-	add-apt-repository ppa:ondrej/php -y
 	apt update
 	apt install -y php"${PHP_VER}" libapache2-mod-php"${PHP_VER}" php"${PHP_VER}"-mysql php"${PHP_VER}"-memcached php"${PHP_VER}"-json php"${PHP_VER}"-mcrypt php"${PHP_VER}"-mbstring php"${PHP_VER}"-xml php"${PHP_VER}"-xmlrpc php"${PHP_VER}"-curl php"${PHP_VER}"-gd php"${PHP_VER}"-imagick
 	
@@ -191,6 +200,11 @@ function rhd_environment_setup {
 	chmod 774 wp-cli.phar
 	chown www-data:www-data wp-cli.phar
 	mv wp-cli.phar /usr/local/bin/wp
+	
+	# Memcached
+	if [ "$MEMCACHED" = "y" ] || [ "$MEMCACHED" = "Y" ]; then
+		rhd_memcached
+	fi
 }
 
 function rhd_apache_tune {
@@ -235,9 +249,9 @@ function rhd_vhost_setup {
 			echo "" >> /etc/apache2/sites-available/"$DOMAIN".conf
 			echo "<VirtualHost *:443>" >> /etc/apache2/sites-available/"$DOMAIN".conf
 			echo "  ServerName $HOSTNAME" >> /etc/apache2/sites-available/"$DOMAIN".conf
-		    echo "  ServerAlias www.$HOSTNAME" >> /etc/apache2/sites-available/"$DOMAIN".conf
-		    echo "  DirectoryIndex index.html index.php" >> /etc/apache2/sites-available/"$DOMAIN".conf
-		    echo "  DocumentRoot /var/www/public" >> /etc/apache2/sites-available/"$DOMAIN".conf
+			echo "  ServerAlias www.$HOSTNAME" >> /etc/apache2/sites-available/"$DOMAIN".conf
+			echo "  DirectoryIndex index.html index.php" >> /etc/apache2/sites-available/"$DOMAIN".conf
+			echo "  DocumentRoot /var/www/public" >> /etc/apache2/sites-available/"$DOMAIN".conf
 			echo "	LogLevel warn" >> /etc/apache2/sites-available/"$DOMAIN".conf
 			echo "	ErrorLog /var/www/log/error.log" >> /etc/apache2/sites-available/"$DOMAIN".conf
 			echo "	CustomLog /var/www/log/acess.log combined" >> /etc/apache2/sites-available/"$DOMAIN".conf
@@ -253,22 +267,27 @@ function rhd_vhost_setup {
 }
 
 
-function rhd_gaswirth_aliases {
-	# Nick's Aliases
-	echo "alias a2restart='sudo systemctl restart apache2.service'" >> /home/gaswirth/.bash_aliases
-	echo "alias a2reload='sudo systemctl reload apache2.service'" >> /home/gaswirth/.bash_aliases
-	echo "alias update='sudo apt-get update && sudo apt-get upgrade --show-upgraded --assume-yes'" >> /home/gaswirth/.bash_aliases
-	echo "alias perms='sudo chown -R www-data:www-data . && sudo chmod -R 664 * && sudo find . -type d -exec sudo chmod 775 {} \;'" >> /home/gaswirth/.bash_aliases
-	echo "alias rhd='cd /var/www/public'" >> /home/gaswirth/.bash_aliases
-	echo "alias a2buddy='curl -sL https://raw.githubusercontent.com/richardforth/apache2buddy/master/apache2buddy.pl | sudo perl'" >> /home/gaswirth/.bash_aliases
-	chown gaswirth:gaswirth .bash_aliases
+function rhd_memcached {
+	sudo apt install memcached sasl2-bin
+	mkdir -p /etc/sasl2
+	
+	cat > /etc/sasl2/memcached.conf <<- EOF
+		mech_list: plain
+		log_level: 5
+		sasldb_path: /etc/sasl2/memcached-sasldb2
+	EOF
+	saslpasswd2 -a memcached -c -n -f /etc/sasl2/memcached-sasldb2 gaswirth
+	chown memcache:memcache /etc/sasl2/memcached-sasldb2
+	systemctl restart memcached
+	
+	echo -e "\n-S" >> /etc/memcached.conf
 }
 
 
 function rhd_goodstuff {
 	# apt cleanup
-	apt autoclean
-	apt autoremove
+	apt autoclean -y
+	apt autoremove -y
 
 	# iTerm Shell Integration (macOS)
 	curl -L https://iterm2.com/misc/install_shell_integration.sh | bash
@@ -278,7 +297,23 @@ function rhd_goodstuff {
 	chown foy:foy /home/foy
 	
 	# Restart services
-	systemctl restart apache2 mysql
+	systemctl restart apache2 
+
+	# Nick's Aliases
+	echo "alias a2restart='sudo systemctl restart apache2.service'" >> /home/gaswirth/.bash_aliases
+	echo "alias a2reload='sudo systemctl reload apache2.service'" >> /home/gaswirth/.bash_aliases
+	echo "alias update='sudo apt-get update && sudo apt-get upgrade --show-upgraded --assume-yes'" >> /home/gaswirth/.bash_aliases
+	echo "alias perms='sudo chown -R www-data:www-data . && sudo chmod -R 664 * && sudo find . -type d -exec sudo chmod 775 {} \;'" >> /home/gaswirth/.bash_aliases
+	echo "alias a2buddy='curl -sL https://raw.githubusercontent.com/richardforth/apache2buddy/master/apache2buddy.pl | sudo perl'" >> /home/gaswirth/.bash_aliases
+
+	# `rhd` shared/private setup
+	if [ "$SHAREDENV" = "y" ] || [ "$SHAREDENV" = "Y" ]; then
+		echo "alias rhd='cd /var/www/public_html'" >> /home/gaswirth/.bash_aliases
+	else
+		echo "alias rhd='cd /var/www/public'" >> /home/gaswirth/.bash_aliases
+	fi
+
+	chown gaswirth:gaswirth .bash_aliases
 }
 
 ##################
@@ -296,7 +331,6 @@ echo "$IPV6	$FQDN	$HOSTNAME" >> /etc/hosts
 # Roll it out
 rhd_initial_setup
 rhd_users_setup
-rhd_gaswirth_aliases
 rhd_environment_setup
 rhd_cron_setup
 rhd_vhost_setup
