@@ -106,6 +106,7 @@ cp -rv /home/gaswirth/resources/plugins/soliloquy wp-content/plugins
 
 # Install and activate plugins
 wp plugin install ajax-thumbnail-rebuild enable-media-replace force-strong-passwords social-warfare gutenberg --activate
+wp plugin delete hello
 
 # Plugins for install only
 # (None)
