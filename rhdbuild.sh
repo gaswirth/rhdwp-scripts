@@ -90,13 +90,9 @@ git commit -m "Initial commit"
 git remote add origin git@github.com:gaswirth/"$REPONAME".git
 git push -u origin master
 
-# Create the primary nav menu, and add the Sample Page for display
-# wp menu create "Main Navigation"
-# wp menu location assign "Site Navigation" primary
-# wp menu item add-post 2 --title="Sample"
-
-# Make sure to "exit" back to the root dir.
+# Make sure to "exit" back to the root dir, and then activate the theme.
 cd "$SITEROOT"
+wp theme activate rhdwp
 
 ## PLUGINS
 echo "Installing plugins..."
