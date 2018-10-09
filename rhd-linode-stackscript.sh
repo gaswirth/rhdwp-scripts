@@ -7,7 +7,6 @@
 # <UDF name="db_user" Label="Create MySQL User" default="" example="Optionally create this user" />
 # <UDF name="db_user_password" Label="Create MySQL User Password" default="" example="User's password" />
 # <UDF name="domain" Label="Site Domain" example="Example: domain.com" default="default" />
-# <UDF name="memcached" Label="Memcached?" example="Y/N (default: N)" default="" />
 # <UDF name="interactive" Label="Interactive dpkg?" example="Y/N (default: N)" default="" />
 # <UDF name="php_ver" Label="PHP Version" example="7.1 (default: 7.1)" default="7.1" />
 
@@ -27,7 +26,7 @@ function rhd_initial_setup {
 	fi
 	
 	# Essential installs
-	apt install -y postfix git ufw mailutils screen software-properties-common python-software-properties wget letsencrypt less man-db clamav clamav-daemon
+	apt install -y postfix git ufw mailutils screen software-properties-common python-software-properties wget letsencrypt less man-db clamav clamav-daemon memcached sasl2-bin
 	
 	# Ondrej PHP repo
 	add-apt-repository ppa:ondrej/php -y
@@ -200,11 +199,6 @@ function rhd_environment_setup {
 	chmod 774 wp-cli.phar
 	chown www-data:www-data wp-cli.phar
 	mv wp-cli.phar /usr/local/bin/wp
-	
-	# Memcached
-	if [ "$MEMCACHED" = "y" ] || [ "$MEMCACHED" = "Y" ]; then
-		rhd_memcached
-	fi
 }
 
 function rhd_apache_tune {
@@ -267,23 +261,6 @@ function rhd_vhost_setup {
 }
 
 
-function rhd_memcached {
-	sudo apt install memcached sasl2-bin
-	mkdir -p /etc/sasl2
-	
-	cat > /etc/sasl2/memcached.conf <<- EOF
-		mech_list: plain
-		log_level: 5
-		sasldb_path: /etc/sasl2/memcached-sasldb2
-	EOF
-	saslpasswd2 -a memcached -c -n -f /etc/sasl2/memcached-sasldb2 gaswirth
-	chown memcache:memcache /etc/sasl2/memcached-sasldb2
-	systemctl restart memcached
-	
-	echo -e "\n-S" >> /etc/memcached.conf
-}
-
-
 function rhd_goodstuff {
 	# apt cleanup
 	apt autoclean -y
@@ -302,7 +279,7 @@ function rhd_goodstuff {
 	# Nick's Aliases
 	echo "alias a2restart='sudo systemctl restart apache2.service'" >> /home/gaswirth/.bash_aliases
 	echo "alias a2reload='sudo systemctl reload apache2.service'" >> /home/gaswirth/.bash_aliases
-	echo "alias update='sudo apt-get update && sudo apt-get upgrade --show-upgraded --assume-yes'" >> /home/gaswirth/.bash_aliases
+	echo "alias update='sudo apt update && sudo apt upgrade --show-upgraded --assume-yes'" >> /home/gaswirth/.bash_aliases
 	echo "alias perms='sudo chown -R www-data:www-data . && sudo chmod -R 664 * && sudo find . -type d -exec sudo chmod 775 {} \;'" >> /home/gaswirth/.bash_aliases
 	echo "alias a2buddy='curl -sL https://raw.githubusercontent.com/richardforth/apache2buddy/master/apache2buddy.pl | sudo perl'" >> /home/gaswirth/.bash_aliases
 
