@@ -16,7 +16,7 @@ function rhd_initial_setup {
 	apt update -y
 	
 	# Essential installs
-	apt install -y postfix git ufw mailutils screen software-properties-common python-software-properties wget letsencrypt less man-db clamav clamav-daemon memcached sasl2-bin
+	apt install -y postfix git ufw mailutils screen software-properties-common wget letsencrypt less man-db clamav clamav-daemon memcached sasl2-bin
 	
 	# System Updates (non-interactive)
 	if [ "$INTERACTIVE" = "y" ] || [ "$INTERACTIVE" = "Y" ]; then
