@@ -129,7 +129,27 @@ function rhd_cron_setup {
 	cp /home/gaswirth/.my.cnf /root/.my.cnf
 	chown root:root /root/.my.cnf
 	
-	# Cron jobs
+	# logrotate
+	cat > /etc/cron.weekly/logrotate <<- EOF
+		#!/bin/sh                                                                                                                                                                                          
+		logrotate /etc/logrotate.conf
+	EOF
+	cat > /etc/logrotate.d/public_html <<- EOF
+		/var/www/public_html/*/log/*.log {
+			weekly
+			rotate 3
+			compress
+			missingok
+			extension log
+			create 644 www-data www-data
+		}
+	EOF
+	chown root:root /etc/logrotate.d/public_html
+	chown root:root /etc/cron.weekly/logrotate
+	chmod 644 /etc/logrotate.d/public_html
+	chmod 655 /etc/cron.weekly/logrotate
+	
+	# Other cron jobs
 	# root
 	cat > /var/spool/cron/crontabs/root <<- EOF
 		0 0 1,15 * * letsencrypt renew --agree-tos --m admin@roundhouse-designs.com
