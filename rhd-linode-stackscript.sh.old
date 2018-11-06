@@ -13,20 +13,20 @@
 source <ssinclude StackScriptID="1">
 
 function rhd_initial_setup {
-	apt update -y
-	
-	# Essential installs
-	apt install -y postfix git ufw mailutils screen software-properties-common python-software-properties wget letsencrypt less man-db clamav clamav-daemon memcached sasl2-bin
-	
 	# System Updates (non-interactive)
 	if [ "$INTERACTIVE" = "y" ] || [ "$INTERACTIVE" = "Y" ]; then
+		apt update
 		apt upgrade
 		apt dist-upgrade
 	else
 		export DEBIAN_FRONTEND=noninteractive
+		apt update -y
 		apt upgrade -y
 		apt -o Dpkg::Options::="--force-confold" -o Dpkg::Options::="--force-confdef" dist-upgrade -y 
 	fi
+	
+	# Essential installs
+	apt install -y postfix git ufw mailutils screen software-properties-common python-software-properties wget letsencrypt less man-db clamav clamav-daemon memcached sasl2-bin
 	
 	# Ondrej PHP repo
 	add-apt-repository ppa:ondrej/php -y
