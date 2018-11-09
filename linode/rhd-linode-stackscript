@@ -8,6 +8,7 @@
 # <UDF name="db_user_password" Label="Create MySQL User Password" default="" example="User's password" />
 # <UDF name="domain" Label="Site Domain" example="Example: domain.com" default="" />
 # <UDF name="php_ver" Label="PHP Version" example="7.1 (default: 7.1)" default="7.1" />
+# <UDF name="migration" Label="Migrating from another Linode?" example="y/N (default: N)" default="N" />
 
 source <ssinclude StackScriptID="353420">
 
@@ -16,7 +17,7 @@ function rhd_initial_setup {
 	
 	# Essential installs
 	apt update -y
-	apt install -y postfix git ufw mailutils screen software-properties-common wget letsencrypt less man-db clamav clamav-daemon sasl2-bin
+	apt install -y postfix git ufw mailutils screen software-properties-common wget letsencrypt less man-db clamav clamav-daemon sasl2-bin python-pip
 	apt upgrade -y
 	apt -o Dpkg::Options::="--force-confold" -o Dpkg::Options::="--force-confdef" dist-upgrade -y 
 	
@@ -102,6 +103,9 @@ function rhd_cron_setup {
 		HELPER="wp_helper.sh --all"
 	fi
 	
+	## Backups
+	pip install --upgrade b2
+	
 	# Install Restic (backups)
 	cd /tmp || exit
 	wget https://github.com/restic/restic/releases/download/v0.9.0/restic_0.9.0_linux_amd64.bz2
@@ -167,8 +171,7 @@ function rhd_environment_setup {
 	usermod -aG www-data gaswirth
 	
 	# Apache2 AllowOverride All on /var/www
-	cp /etc/apache2/apache2.conf /etc/apache2/apache2.conf.bak
-	sed '/<Directory \/var\/www\/>/,/<\/Directory>/ s/AllowOverride All/AllowOverride None/' /etc/apache2/apache2.conf
+	sed -i.orig '/<Directory \/var\/www\/>/,/<\/Directory>/ s/AllowOverride None/AllowOverride All/' apache2.conf
 	
 	# PHP + MySQL
 	apt update
@@ -284,7 +287,21 @@ function rhd_goodstuff {
 	# restarts services that have a file in /tmp/needs-restart/
 	restartServices
 	
+	if [ "$MIGRATION" = "y" ] || [ "$MIGRATION" = "Y" ]; then
+		rhd_prep_migration
+	fi;
+	
 	echo "********** HUZZAH!!! **********"
+}
+
+
+function rhd_prep_migration {
+	chown -R gaswirth:www-data /var/www
+	rmdir /var/www/public
+	rmdir /var/www/public_html
+	rm /etc/apache2/sites-available/*
+	mv /etc/apache2/mods-available/mpm_prefork.conf /etc/apache2/mods-available/mpm_prefork.conf.orig
+	cp /etc/hosts /etc/hosts.orig
 }
 
 

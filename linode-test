@@ -1,9 +1,0 @@
-#!/bin/bash
-
-HOSTS=$(linode-cli linodes list --format=label --text)
-
-for HOST in $HOSTS; do
-	if [ "$HOST" != "label" ]; then
-		echo "$HOST.roundhouse-designs.com"
-	fi
-done;
