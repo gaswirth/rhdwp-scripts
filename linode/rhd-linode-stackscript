@@ -132,12 +132,12 @@ function rhd_cron_setup {
 	EOF
 	cat > /etc/logrotate.d/public_html <<- EOF
 		/var/www/public_html/*/log/*.log {
-			weekly
-			rotate 3
-			compress
-			missingok
-			extension log
-			create 644 www-data www-data
+		  weekly
+		  rotate 3
+		  compress
+		  missingok
+		  extension log
+		  create 644 www-data www-data
 		}
 	EOF
 	chown root:root /etc/logrotate.d/public_html
@@ -192,15 +192,18 @@ function rhd_environment_setup {
 	cp /etc/mysql/mysql.conf.d/mysqld.cnf /etc/mysql/mysql.conf.d/mysqld.cnf.bak
 	sed -i -e 's/query_cache_limit/#query_cache_limit/' /etc/mysql/mysql.conf.d/mysqld.cnf
 	sed -i -e 's/query_cache_size/#query_cache_size/' /etc/mysql/mysql.conf.d/mysqld.cnf
-	echo "" >> /etc/mysql/mysql.conf.d/mysqld.cnf
-	echo "# RHD" >> /etc/mysql/mysql.conf.d/mysqld.cnf
-	echo "query_cache_size = 0" >> /etc/mysql/mysql.conf.d/mysqld.cnf
-    echo "query_cache_type =0" >> /etc/mysql/mysql.conf.d/mysqld.cnf
-    echo "query_cache_limit = 16M" >> /etc/mysql/mysql.conf.d/mysqld.cnf
-    echo "join_buffer_size = 512K" >> /etc/mysql/mysql.conf.d/mysqld.cnf
-    echo "tmp_table_size = 32M" >> /etc/mysql/mysql.conf.d/mysqld.cnf
-    echo "max_heap_table_size = 32M" >> /etc/mysql/mysql.conf.d/mysqld.cnf
-    echo "innodb_log_file_size = 16M" >> /etc/mysql/mysql.conf.d/mysqld.cnf
+	cat > /etc/mysql/mysql.conf.d/mysqld.cnf <<- EOF
+		# Skip reverse DNS lookup of clients
+		skip-name-resolve
+		
+		query_cache_size = 0
+		query_cache_type = 0
+		query_cache_limit = 16M
+		join_buffer_size = 512K
+		tmp_table_size = 32M
+		max_heap_table_size = 32M
+		innodb_log_file_size = 16M
+	EOF
 	
 	# WP-CLI
 	curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
@@ -217,32 +220,34 @@ function rhd_vhost_setup {
 		if [ -e "/etc/apache2/sites-available/""$DOMAIN"".conf" ]; then
 			echo "/etc/apache2/sites-available/""$DOMAIN"".conf already exists"
 		else
-			echo "# domain: $DOMAIN" > /etc/apache2/sites-available/"$DOMAIN".conf
-			echo "# public: /var/www/public/" >> /etc/apache2/sites-available/"$DOMAIN".conf
-			echo "" >> /etc/apache2/sites-available/"$DOMAIN".conf
-			echo "<VirtualHost *:80>" >> /etc/apache2/sites-available/"$DOMAIN".conf
-			echo "	ServerName $HOSTNAME" >> /etc/apache2/sites-available/"$DOMAIN".conf
-			echo "	ServerAlias www.$HOSTNAME" >> /etc/apache2/sites-available/"$DOMAIN".conf
-			echo "	DirectoryIndex index.html index.php" >> /etc/apache2/sites-available/"$DOMAIN".conf
-			echo "	DocumentRoot /var/www/public" >> /etc/apache2/sites-available/"$DOMAIN".conf
-			echo "	LogLevel warn" >> /etc/apache2/sites-available/"$DOMAIN".conf
-			echo "	ErrorLog /var/www/log/error.log" >> /etc/apache2/sites-available/"$DOMAIN".conf
-			echo "  CustomLog /var/www/log/access.log combined" >> /etc/apache2/sites-available/"$DOMAIN".conf
-			echo "</VirtualHost>" >> /etc/apache2/sites-available/"$DOMAIN".conf
-			echo "" >> /etc/apache2/sites-available/"$DOMAIN".conf
-			echo "<VirtualHost *:443>" >> /etc/apache2/sites-available/"$DOMAIN".conf
-			echo "  ServerName $HOSTNAME" >> /etc/apache2/sites-available/"$DOMAIN".conf
-			echo "  ServerAlias www.$HOSTNAME" >> /etc/apache2/sites-available/"$DOMAIN".conf
-			echo "  DirectoryIndex index.html index.php" >> /etc/apache2/sites-available/"$DOMAIN".conf
-			echo "  DocumentRoot /var/www/public" >> /etc/apache2/sites-available/"$DOMAIN".conf
-			echo "	LogLevel warn" >> /etc/apache2/sites-available/"$DOMAIN".conf
-			echo "	ErrorLog /var/www/log/error.log" >> /etc/apache2/sites-available/"$DOMAIN".conf
-			echo "	CustomLog /var/www/log/acess.log combined" >> /etc/apache2/sites-available/"$DOMAIN".conf
-			echo "" >> /etc/apache2/sites-available/"$DOMAIN".conf
-			echo "	# SSLEngine On" >> /etc/apache2/sites-available/"$DOMAIN".conf
-			echo "	# SSLCertificateFile /etc/letsencrypt/live/$HOSTNAME/fullchain.pem" >> /etc/apache2/sites-available/"$DOMAIN".conf
-			echo "	# SSLCertificateKeyFile /etc/letsencrypt/live/$HOSTNAME/privkey.pem" >> /etc/apache2/sites-available/"$DOMAIN".conf
-			echo "</VirtualHost>" >> /etc/apache2/sites-available/"$DOMAIN".conf
+			cat > /etc/apache2/sites-available/"$DOMAIN".conf <<- EOF			
+				# domain: $DOMAIN
+				# public: /var/www/public/
+				
+				<VirtualHost *:80>
+				  ServerName $HOSTNAME
+				  ServerAlias www.$HOSTNAME
+				  DirectoryIndex index.html index.php
+				  DocumentRoot /var/www/public
+				  LogLevel warn
+				  ErrorLog /var/www/log/error.log
+				  CustomLog /var/www/log/access.log combined
+				</VirtualHost>
+				
+				<VirtualHost *:443>
+				  ServerName $HOSTNAME
+				  ServerAlias www.$HOSTNAME
+				  DirectoryIndex index.html index.php
+				  DocumentRoot /var/www/public
+				  LogLevel warn
+				  ErrorLog /var/www/log/error.log
+				  CustomLog /var/www/log/acess.log combined
+				
+				  # SSLEngine On
+				  # SSLCertificateFile /etc/letsencrypt/live/$HOSTNAME/fullchain.pem
+				  # SSLCertificateKeyFile /etc/letsencrypt/live/$HOSTNAME/privkey.pem
+				</VirtualHost>
+			EOF
 		fi
 		a2ensite "$DOMAIN".conf
 	
@@ -269,11 +274,13 @@ function rhd_goodstuff {
 	systemctl restart apache2 
 
 	# Nick's Aliases
-	echo "alias a2restart='sudo systemctl restart apache2.service'" >> /home/gaswirth/.bash_aliases
-	echo "alias a2reload='sudo systemctl reload apache2.service'" >> /home/gaswirth/.bash_aliases
-	echo "alias update='sudo apt update && sudo apt upgrade --show-upgraded --assume-yes'" >> /home/gaswirth/.bash_aliases
-	echo "alias perms='sudo chown -R www-data:www-data . && sudo chmod -R 664 * && sudo find . -type d -exec sudo chmod 775 {} \;'" >> /home/gaswirth/.bash_aliases
-	echo "alias a2buddy='curl -sL https://raw.githubusercontent.com/richardforth/apache2buddy/master/apache2buddy.pl | sudo perl'" >> /home/gaswirth/.bash_aliases
+	cat > /home/gaswirth/.bash_aliase <<- EOF				
+		alias a2restart='sudo systemctl restart apache2.service'
+		alias a2reload='sudo systemctl reload apache2.service'
+		alias update='sudo apt update && sudo apt upgrade --show-upgraded --assume-yes'
+		alias perms='sudo chown -R www-data:www-data . && sudo chmod -R 664 * && sudo find . -type d -exec sudo chmod 775 {} \;'
+		alias a2buddy='curl -sL https://raw.githubusercontent.com/richardforth/apache2buddy/master/apache2buddy.pl | sudo perl'
+	EOF
 
 	# `rhd` shared/private setup
 	if [ "$SHAREDENV" = "y" ] || [ "$SHAREDENV" = "Y" ]; then
