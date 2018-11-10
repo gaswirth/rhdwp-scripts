@@ -100,7 +100,7 @@ function rhd_cron_setup {
 	if [ "$SHAREDENV" = "y" ] || [ "$SHAREDENV" = "Y" ]; then	
 		HELPER="run_wp_helper.sh"
 	else
-		HELPER="wp_helper.sh --all"
+		HELPER="wp_helper.sh --update=all"
 	fi
 	
 	## Backups
@@ -192,7 +192,8 @@ function rhd_environment_setup {
 	cp /etc/mysql/mysql.conf.d/mysqld.cnf /etc/mysql/mysql.conf.d/mysqld.cnf.bak
 	sed -i -e 's/query_cache_limit/#query_cache_limit/' /etc/mysql/mysql.conf.d/mysqld.cnf
 	sed -i -e 's/query_cache_size/#query_cache_size/' /etc/mysql/mysql.conf.d/mysqld.cnf
-	cat > /etc/mysql/mysql.conf.d/mysqld.cnf <<- EOF
+	
+	cat >> /etc/mysql/mysql.conf.d/mysqld.cnf <<- EOF
 		# Skip reverse DNS lookup of clients
 		skip-name-resolve
 		
@@ -274,7 +275,7 @@ function rhd_goodstuff {
 	systemctl restart apache2 
 
 	# Nick's Aliases
-	cat > /home/gaswirth/.bash_aliase <<- EOF				
+	cat > /home/gaswirth/.bash_aliases <<- EOF				
 		alias a2restart='sudo systemctl restart apache2.service'
 		alias a2reload='sudo systemctl reload apache2.service'
 		alias update='sudo apt update && sudo apt upgrade --show-upgraded --assume-yes'

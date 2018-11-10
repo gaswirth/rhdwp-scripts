@@ -15,6 +15,7 @@ read -p "GitHub repository name: " REPONAME
 read -n 1 -s -r -p "Please create a '$REPONAME' GitHub repository, then press any key to continue..."
 echo ""
 echo "*****************"
+read -p "Multisite install? Y/N (Default: N)" MULTISITE
 read -p "Send WordPress emails Y/N? (Default: N)" SENDEMAILS
 echo ""
 echo "*******************"
@@ -126,6 +127,15 @@ fi
 
 wp user update nick --first_name="Nick" --last_name="Gaswirth"
 wp user update nick ryan --user_url="https://roundhouse-designs.com"
+
+# Multisite setup
+if [ "$MULTISITE" = "y" ] || [ "MULTISITE" = "Y" ]; then
+	sed -i "/define('WP_DEBUG', false);/ a\
+	\/* Multisite *\/\
+	define( 'WP_ALLOW_MULTISITE', true );\
+	" wp-config.php
+fi
+
 
 # Set final permissions
 echo "Finalizing..."

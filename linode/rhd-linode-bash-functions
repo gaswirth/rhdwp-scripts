@@ -17,7 +17,7 @@ function systemPrimaryIPV6 {
 function sshDisableRoot {
 	# Disables root SSH access.
 	sed -i 's/PermitRootLogin yes/PermitRootLogin no/' /etc/ssh/sshd_config
-	touch /tmp/restart-ssh    
+	touch /tmp/restart-ssh
 }
 
 function restartServices {
