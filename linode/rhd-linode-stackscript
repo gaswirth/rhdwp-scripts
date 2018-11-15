@@ -186,9 +186,6 @@ function rhd_environment_setup {
 	rm -rf /var/www/html
 	usermod -aG www-data gaswirth
 	
-	# Apache2 AllowOverride All on /var/www
-	sed -i.bak '/<Directory \/var\/www\/>/,/<\/Directory>/ s/AllowOverride None/AllowOverride All/' apache2.conf
-	
 	# PHP + MySQL
 	apt update
 	
@@ -274,6 +271,9 @@ function rhd_vhost_setup {
 		a2ensite "$DOMAIN".conf
 	
 	fi
+	
+	# Apache2 AllowOverride All on /var/www
+	sed -i.bak '/<Directory \/var\/www\/>/,/<\/Directory>/ s/AllowOverride None/AllowOverride All/' apache2.conf
 }
 
 
@@ -312,6 +312,7 @@ function rhd_goodstuff {
 	fi
 
 	chown gaswirth:gaswirth .bash_aliases
+	chown gaswirth:gaswirth scripts
 	
 	# restarts services that have a file in /tmp/needs-restart/
 	restartServices
