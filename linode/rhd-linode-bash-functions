@@ -59,9 +59,10 @@ function mysql_tune {
         else PERCENT="$1"
     fi
 
-    sed -i -e 's/^#skip-innodb/skip-innodb/' /etc/mysql/my.cnf # disable innodb - saves about 100M
+    # sed -i -e 's/^#skip-innodb/skip-innodb/' /etc/mysql/my.cnf # disable innodb - saves about 100M
 
-    MEM=$(awk '/MemTotal/ {print int($2/1024)}' /proc/meminfo) # how much memory in MB this system has
+    #MEM=$(awk '/MemTotal/ {print int($2/1024)}' /proc/meminfo) # how much memory in MB this system has
+    MEM=$LINODE_RAM
     MYMEM=$((MEM*PERCENT/100)) # how much memory we would like to tune mysql with
     MYMEMCHUNKS=$((MYMEM/4)) # how many 4MB chunks we have to play with
 
@@ -163,7 +164,8 @@ function apache_tune {
 	apt -y install apache2-mpm-prefork libapache2-modsecurity
 	a2enmod expires ssl rewrite headers security2
 	PERPROCMEM=15 # the amount of memory in MB each apache process is likely to utilize
-	MEM=$(grep MemTotal /proc/meminfo | awk '{ print int($2/1024) }') # how much memory in MB this system has
+	#MEM=$(grep MemTotal /proc/meminfo | awk '{ print int($2/1024) }') # how much memory in MB this system has
+	MEM=$LINODE_RAM
 	MAXCLIENTS=$((MEM*PERCENT/100/PERPROCMEM)) # calculate MaxClients
 	MAXCLIENTS=${MAXCLIENTS/.*} # cast to an integer
 	sed -i -e "s/\(^[ \t]*MaxClients[ \t]*\)[0-9]*/\1$MAXCLIENTS/" /etc/apache2/apache2.conf

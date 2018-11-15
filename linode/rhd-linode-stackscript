@@ -7,10 +7,13 @@
 # <UDF name="db_user" Label="Create MySQL User" default="" example="Optionally create this user" />
 # <UDF name="db_user_password" Label="Create MySQL User Password" default="" example="User's password" />
 # <UDF name="domain" Label="Site Domain" example="Example: domain.com" default="" />
-# <UDF name="php_ver" Label="PHP Version" example="7.1 (default: 7.1)" default="7.1" />
+# <UDF name="php_ver" Label="PHP Version" oneOf="7.0,7.1,7.2" default="7.2" />
 # <UDF name="migration" Label="Migrating from another Linode?" example="y/N (default: N)" default="N" />
 
+# Custom bash helpers
 source <ssinclude StackScriptID="353420">
+
+USERHOME=/home/gaswirth
 
 function rhd_initial_setup {
 	export DEBIAN_FRONTEND=noninteractive
@@ -58,22 +61,22 @@ function rhd_users_setup {
 	usermod -aG sudo gaswirth
 	
 	adduser foy --disabled-password --gecos ""
-	echo "foy:$(cat /dev/urandom | tr -cd [:graph:] | head -c 12)" | chpasswd
+	echo "foy:$(cat /dev/urandom | tr -cd '[:graph:]' | head -c 12)" | chpasswd
 	usermod -aG sudo foy
 	
 	# Install user pubkeys
 	# Generate SSH keys for gaswirth
-	mkdir {/home/gaswirth/.ssh,/home/foy/.ssh}
-	touch {/home/gaswirth/.ssh/authorized_keys,/home/foy/.ssh/authorized_keys}
-	chmod 700 /home/gaswirth/.ssh /home/foy/.ssh
-	chmod 600 /home/gaswirth/.ssh/authorized_keys /home/foy/.ssh/authorized_keys
-	chown -R gaswirth:gaswirth /home/gaswirth/.ssh
+	mkdir {"$USERHOME"/.ssh,/home/foy/.ssh}
+	touch {"$USERHOME"/.ssh/authorized_keys,/home/foy/.ssh/authorized_keys}
+	chmod 700 "$USERHOME"/.ssh /home/foy/.ssh
+	chmod 600 "$USERHOME"/.ssh/authorized_keys /home/foy/.ssh/authorized_keys
+	chown -R gaswirth:gaswirth "$USERHOME"/.ssh
 	chown -R foy:foy /home/foy/.ssh
-	sudo -u gaswirth ssh-keygen -f /home/gaswirth/.ssh/id_rsa -N ''
+	sudo -u gaswirth ssh-keygen -f "$USERHOME"/.ssh/id_rsa -N ''
 	
 	#gaswirth
-	echo "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC79KWiV0WjBJV8c6AgJnonh12jlVr//3e23of+ADCfgNMasIB8UT9H+xM1zeBh8GmzsrrI4FfiGhhvawa6gyFgbJsSReKWJbsoqFYzUYTDulECsO/iTO438lYIdu4Jsobm+1UsNOX6p3u2zXCrfj1ItLUSGT/dFwTizZIXmktrrg8icW3uFcPieVUqC1qVGsznIgYPDUhPIDLeEELzU87fOfy49YuTZ/M10a4Y8zIv9klzno27RZm90OTA4eqZ1VA+7soWo3TREzhY3X/ZQHC2kdhaseAgUdPfm1hxFg7Cc+Czs6+lAwcA1WhPMAdBKteq5ovbAvphOpQIuVVPkQ+1 gaswirth@Frankengassy.local" >> /home/gaswirth/.ssh/authorized_keys
-	echo "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDbTWzq9yXe8A52N/HzINynxX+miY1zLoh2yTKXxzaJ/OdZGcpMFXWTdy8X+RHtOBIzrOD8oNeQGnEZVzKOYnJQBM1UhUztuJkjn2BM5KCh4LhKOhdn6XjrF8WfKN3P/rcjG0E9IREMKDvtQvdFIqaC2FNkKnVDtan5l3ga1493pckImDO1+E+qwfc3n/XsXj9kHXJ4di9CQ7Y8FI/ODvRq2m+/cZea9RZqHSPYjzhoH2/ol9w5ihLYb9L6sEEaGHn/Xr03bS5paAGV6QG4l2+4UuefLfrgUv4oYx1VVHwejrg26ickU9tuOFCvrOq4eQq4VTCkmEzYtFf/TdhCg33/ gaswirth@Gassybook.local" >> /home/gaswirth/.ssh/authorized_keys
+	echo "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC79KWiV0WjBJV8c6AgJnonh12jlVr//3e23of+ADCfgNMasIB8UT9H+xM1zeBh8GmzsrrI4FfiGhhvawa6gyFgbJsSReKWJbsoqFYzUYTDulECsO/iTO438lYIdu4Jsobm+1UsNOX6p3u2zXCrfj1ItLUSGT/dFwTizZIXmktrrg8icW3uFcPieVUqC1qVGsznIgYPDUhPIDLeEELzU87fOfy49YuTZ/M10a4Y8zIv9klzno27RZm90OTA4eqZ1VA+7soWo3TREzhY3X/ZQHC2kdhaseAgUdPfm1hxFg7Cc+Czs6+lAwcA1WhPMAdBKteq5ovbAvphOpQIuVVPkQ+1 gaswirth@Frankengassy.local" >> "$USERHOME"/.ssh/authorized_keys
+	echo "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDbTWzq9yXe8A52N/HzINynxX+miY1zLoh2yTKXxzaJ/OdZGcpMFXWTdy8X+RHtOBIzrOD8oNeQGnEZVzKOYnJQBM1UhUztuJkjn2BM5KCh4LhKOhdn6XjrF8WfKN3P/rcjG0E9IREMKDvtQvdFIqaC2FNkKnVDtan5l3ga1493pckImDO1+E+qwfc3n/XsXj9kHXJ4di9CQ7Y8FI/ODvRq2m+/cZea9RZqHSPYjzhoH2/ol9w5ihLYb9L6sEEaGHn/Xr03bS5paAGV6QG4l2+4UuefLfrgUv4oYx1VVHwejrg26ickU9tuOFCvrOq4eQq4VTCkmEzYtFf/TdhCg33/ gaswirth@Gassybook.local" >> "$USERHOME"/.ssh/authorized_keys
 	
 	#foy
 	echo "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDTvprX8q2H13YwUtbtaIiBk6MT8is8cb4IJJitZQ3DrQ4IpmLulepxKFPdAqzUE2wxCfU8xmXzC2uIq/VGp02dbVOzT2bHyi9XAJTGX4s7hsVyACPXeSHW30dpdHYrLPbEBLx9TY7ODg/sZ/wLb7OAACglLHlxn7/KkRfWyS2XpCWjCzpLK2koC2NpvAFqyue18cBZ37Jm/fIArPiiYxV3JCzAfkStAf14iv4UjRZ0UyJqN2XCYML+Lplo2ltvSffRYTuFxrzszJNkfLuKVx5Gagx7V4P/+GYKpBLAmHpIKTQjEoIqxcA7kNfGOBIAWK21z9ZzlRQGnhO6kqXOPhur foy@Ryan-Foys-Macbook-Pro-2.local" > /home/foy/.ssh/authorized_keys
@@ -84,7 +87,20 @@ function rhd_users_setup {
 }
 
 
-function rhd_runme_script {
+function rhd_user_scripts {
+	# Create ~/scripts directory
+	if [ ! -d "$USERHOME"/scripts ]; then
+		mkdir "$USERHOME"/scripts
+	fi
+	
+	# Install mysqltuner.pl
+	#   
+	wget http://mysqltuner.pl/ -O "$USERHOME"/scripts/mysqltuner/mysqltuner.pl
+	wget https://raw.githubusercontent.com/major/MySQLTuner-perl/master/basic_passwords.txt -O "$USERHOME"/scripts/mysqltuner/basic_passwords.txt
+	wget https://raw.githubusercontent.com/major/MySQLTuner-perl/master/vulnerabilities.csv -O "$USERHOME"/scripts/mysqltuner/vulnerabilities.csv
+	chmod +x "$USERHOME"/scripts/mysqltuner/mysqltuner.pl
+	
+	# Post setup operations
 	cd /home/gaswirth || exit
 	wget https://raw.githubusercontent.com/gaswirth/rhdwp-scripts/forked-repos/runme.sh
 	chmod +x runme.sh
@@ -120,9 +136,9 @@ function rhd_cron_setup {
 		user=root
 		password="$DB_PASSWORD"
 	EOF
-	chown gaswirth:gaswirth /home/gaswirth/.my.cnf
-	chmod 600 /home/gaswirth/.my.cnf
-	cp /home/gaswirth/.my.cnf /root/.my.cnf
+	chown gaswirth:gaswirth "$USERHOME"/.my.cnf
+	chmod 600 "$USERHOME"/.my.cnf
+	cp "$USERHOME"/.my.cnf /root/.my.cnf
 	chown root:root /root/.my.cnf
 	
 	# logrotate
@@ -149,7 +165,7 @@ function rhd_cron_setup {
 	# root
 	cat > /var/spool/cron/crontabs/root <<- EOF
 		0 0 1,15 * * letsencrypt renew --agree-tos --m admin@roundhouse-designs.com
-		0 */6 * * * bash /home/gaswirth/scripts/restic-backup.sh >/dev/null 2>&1
+		0 */6 * * * bash "$USERHOME"/scripts/restic-backup.sh >/dev/null 2>&1
 	EOF
 	
 	# www-data
@@ -157,7 +173,7 @@ function rhd_cron_setup {
 		30 6 * * * /usr/local/bin/rhd_wp_helper/$HELPER
 	EOF
 	
-	rhd_runme_script
+	rhd_user_scripts
 }
 
 
@@ -171,11 +187,16 @@ function rhd_environment_setup {
 	usermod -aG www-data gaswirth
 	
 	# Apache2 AllowOverride All on /var/www
-	sed -i.orig '/<Directory \/var\/www\/>/,/<\/Directory>/ s/AllowOverride None/AllowOverride All/' apache2.conf
+	sed -i.bak '/<Directory \/var\/www\/>/,/<\/Directory>/ s/AllowOverride None/AllowOverride All/' apache2.conf
 	
 	# PHP + MySQL
 	apt update
-	apt install -y php"${PHP_VER}" libapache2-mod-php"${PHP_VER}" php"${PHP_VER}"-mysql php"${PHP_VER}"-json php"${PHP_VER}"-mcrypt php"${PHP_VER}"-mbstring php"${PHP_VER}"-xml php"${PHP_VER}"-xmlrpc php"${PHP_VER}"-curl php"${PHP_VER}"-gd php"${PHP_VER}"-imagick
+	
+	apt install -y php"${PHP_VER}" libapache2-mod-php"${PHP_VER}" php"${PHP_VER}"-mysql php"${PHP_VER}"-json php"${PHP_VER}"-mbstring php"${PHP_VER}"-xml php"${PHP_VER}"-xmlrpc php"${PHP_VER}"-curl php"${PHP_VER}"-gd php"${PHP_VER}"-imagick
+	
+	if [ "$PHP_VER" -le "7.1" ]; then	
+		apt install -y php"${PHP_VER}"-mcrypt
+	fi
 	
 	# MySQL
 	if [ -n "$DB_PASSWORD" ]; then
@@ -268,14 +289,14 @@ function rhd_goodstuff {
 	sed -i -e 's/^#PS1=/PS1=/' /root/.bashrc # enable the colorful root bash prompt
 	
 	# Ensure proper permissions, just in case I fucked something up...
-	chown gaswirth:gaswirth /home/gaswirth
+	chown gaswirth:gaswirth "$USERHOME"
 	chown foy:foy /home/foy
 	
 	# Restart services
 	systemctl restart apache2 
 
 	# Nick's Aliases
-	cat > /home/gaswirth/.bash_aliases <<- EOF				
+	cat > "$USERHOME"/.bash_aliases <<- EOF				
 		alias a2restart='sudo systemctl restart apache2.service'
 		alias a2reload='sudo systemctl reload apache2.service'
 		alias update='sudo apt update && sudo apt upgrade --show-upgraded --assume-yes'
@@ -285,9 +306,9 @@ function rhd_goodstuff {
 
 	# `rhd` shared/private setup
 	if [ "$SHAREDENV" = "y" ] || [ "$SHAREDENV" = "Y" ]; then
-		echo "alias rhd='cd /var/www/public_html'" >> /home/gaswirth/.bash_aliases
+		echo "alias rhd='cd /var/www/public_html'" >> "$USERHOME"/.bash_aliases
 	else
-		echo "alias rhd='cd /var/www/public'" >> /home/gaswirth/.bash_aliases
+		echo "alias rhd='cd /var/www/public'" >> "$USERHOME"/.bash_aliases
 	fi
 
 	chown gaswirth:gaswirth .bash_aliases
