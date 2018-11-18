@@ -61,7 +61,8 @@ function rhd_users_setup {
 	usermod -aG sudo gaswirth
 	
 	adduser foy --disabled-password --gecos ""
-	echo "foy:$(cat /dev/urandom | tr -cd '[:graph:]' | head -c 12)" | chpasswd
+	useradd foy
+	echo foy:"$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 12 | head -n 1)" | chpasswd
 	usermod -aG sudo foy
 	
 	# Install user pubkeys
@@ -94,7 +95,6 @@ function rhd_user_scripts {
 	fi
 	
 	# Install mysqltuner.pl
-	#   
 	wget http://mysqltuner.pl/ -O "$USERHOME"/scripts/mysqltuner/mysqltuner.pl
 	wget https://raw.githubusercontent.com/major/MySQLTuner-perl/master/basic_passwords.txt -O "$USERHOME"/scripts/mysqltuner/basic_passwords.txt
 	wget https://raw.githubusercontent.com/major/MySQLTuner-perl/master/vulnerabilities.csv -O "$USERHOME"/scripts/mysqltuner/vulnerabilities.csv
@@ -113,10 +113,12 @@ function rhd_cron_setup {
 	chown -R www-data:www-data /usr/local/bin/rhd_wp_helper
 	chmod 774 /usr/local/bin/rhd_wp_helper/*.sh
 	
-	if [ "$SHAREDENV" = "Yes" ]; then	
+	if [ "$SHAREDENV" = "Yes" ]; then
 		HELPER="run_wp_helper.sh"
+		LOGFILES="/var/www/public_html/*/log/*.log"
 	else
 		HELPER="wp_helper.sh --update=all"
+		LOGFILES="/var/www/log/*.log"
 	fi
 	
 	## Backups
@@ -147,7 +149,7 @@ function rhd_cron_setup {
 		logrotate /etc/logrotate.conf
 	EOF
 	cat > /etc/logrotate.d/public_html <<- EOF
-		/var/www/public_html/*/log/*.log {
+		$LOGFILES {
 		  weekly
 		  rotate 3
 		  compress
@@ -186,13 +188,21 @@ function rhd_environment_setup {
 	rm -rf /var/www/html
 	usermod -aG www-data gaswirth
 	
-	# PHP + MySQL
+	# PHP
 	apt update
 	
 	apt install -y php"${PHP_VER}" libapache2-mod-php"${PHP_VER}" php"${PHP_VER}"-mysql php"${PHP_VER}"-json php"${PHP_VER}"-mbstring php"${PHP_VER}"-xml php"${PHP_VER}"-xmlrpc php"${PHP_VER}"-curl php"${PHP_VER}"-gd php"${PHP_VER}"-imagick
 	
-	if [ "$PHP_VER" -le "7.1" ]; then	
+	if (( $(echo "$PHP_VER > 7.1" | bc -l) )); then	
 		apt install -y php"${PHP_VER}"-mcrypt
+	fi
+	
+	# AllowOverride All
+	sed -i.bak '/<Directory \/var\/www\/>/,/<\/Directory>/ s/AllowOverride None/AllowOverride All/' /etc/apache2/apache2.conf
+	
+	if [ "$SHAREDENV" != "Yes" ]; then
+		sed -i.orig 's/post_max_size = [0-9]*M/post_max_size = 20M/' /etc/php/"$PHP_VER"/apache2/php.ini
+		sed -i.orig 's/upload_max_filesize = [0-9]*M/upload_max_filesize = 20M/' /etc/php/"$PHP_VER"/apache2/php.ini
 	fi
 	
 	# MySQL
@@ -239,7 +249,7 @@ function rhd_vhost_setup {
 		if [ -e "/etc/apache2/sites-available/""$DOMAIN"".conf" ]; then
 			echo "/etc/apache2/sites-available/""$DOMAIN"".conf already exists"
 		else
-			cat > /etc/apache2/sites-available/"$DOMAIN".conf <<- EOF			
+			cat > "/etc/apache2/sites-available/$DOMAIN.conf" <<- EOF			
 				# domain: $DOMAIN
 				# public: /var/www/public/
 				
@@ -271,9 +281,6 @@ function rhd_vhost_setup {
 		a2ensite "$DOMAIN".conf
 	
 	fi
-	
-	# Apache2 AllowOverride All on /var/www
-	sed -i.bak '/<Directory \/var\/www\/>/,/<\/Directory>/ s/AllowOverride None/AllowOverride All/' /etc/apache2/apache2.conf
 }
 
 
