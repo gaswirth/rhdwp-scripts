@@ -1,14 +1,14 @@
 #!/bin/bash
 # <UDF name="hostname" label="Hostname" />
 # <UDF name="userpassword" label="User password" />
-# <UDF name="sharedenv" label="Shared environment?" example="Y/N" default="N" />
+# <UDF name="sharedenv" label="Shared environment?" oneOf="Yes,No" default="No" />
 # <UDF name="db_password" Label="MySQL root Password" />
 # <UDF name="db_name" Label="Create Database" default="" example="Optionally create this database" />
 # <UDF name="db_user" Label="Create MySQL User" default="" example="Optionally create this user" />
 # <UDF name="db_user_password" Label="Create MySQL User Password" default="" example="User's password" />
 # <UDF name="domain" Label="Site Domain" example="Example: domain.com" default="" />
 # <UDF name="php_ver" Label="PHP Version" oneOf="7.0,7.1,7.2" default="7.2" />
-# <UDF name="migration" Label="Migrating from another Linode?" example="y/N (default: N)" default="N" />
+# <UDF name="migration" Label="Migrating from another Linode?" oneOf="Yes,No" default="No" />
 
 # Custom bash helpers
 source <ssinclude StackScriptID="353420">
@@ -113,7 +113,7 @@ function rhd_cron_setup {
 	chown -R www-data:www-data /usr/local/bin/rhd_wp_helper
 	chmod 774 /usr/local/bin/rhd_wp_helper/*.sh
 	
-	if [ "$SHAREDENV" = "y" ] || [ "$SHAREDENV" = "Y" ]; then	
+	if [ "$SHAREDENV" = "Yes" ]; then	
 		HELPER="run_wp_helper.sh"
 	else
 		HELPER="wp_helper.sh --update=all"
@@ -170,7 +170,7 @@ function rhd_cron_setup {
 	
 	# www-data
 	cat > /var/spool/cron/crontabs/www-data <<- EOF
-		30 6 * * * /usr/local/bin/rhd_wp_helper/$HELPER
+		0 0 * * * /usr/local/bin/rhd_wp_helper/$HELPER
 	EOF
 	
 	rhd_user_scripts
@@ -273,7 +273,7 @@ function rhd_vhost_setup {
 	fi
 	
 	# Apache2 AllowOverride All on /var/www
-	sed -i.bak '/<Directory \/var\/www\/>/,/<\/Directory>/ s/AllowOverride None/AllowOverride All/' apache2.conf
+	sed -i.bak '/<Directory \/var\/www\/>/,/<\/Directory>/ s/AllowOverride None/AllowOverride All/' /etc/apache2/apache2.conf
 }
 
 
@@ -283,7 +283,7 @@ function rhd_goodstuff {
 	apt autoremove -y
 
 	# iTerm Shell Integration (macOS)
-	curl -L https://iterm2.com/misc/install_shell_integration.sh | bash
+	curl -L https://iterm2.com/shell_integration/install_shell_integration_and_utilities.sh | bash
 	
 	# Enable the colorful root bash prompt
 	sed -i -e 's/^#PS1=/PS1=/' /root/.bashrc # enable the colorful root bash prompt
@@ -305,7 +305,7 @@ function rhd_goodstuff {
 	EOF
 
 	# `rhd` shared/private setup
-	if [ "$SHAREDENV" = "y" ] || [ "$SHAREDENV" = "Y" ]; then
+	if [ "$SHAREDENV" = "Yes" ]; then
 		echo "alias rhd='cd /var/www/public_html'" >> "$USERHOME"/.bash_aliases
 	else
 		echo "alias rhd='cd /var/www/public'" >> "$USERHOME"/.bash_aliases
@@ -317,7 +317,7 @@ function rhd_goodstuff {
 	# restarts services that have a file in /tmp/needs-restart/
 	restartServices
 	
-	if [ "$MIGRATION" = "y" ] || [ "$MIGRATION" = "Y" ]; then
+	if [ "$MIGRATION" = "Yes" ]; then
 		rhd_prep_migration
 	fi;
 	
