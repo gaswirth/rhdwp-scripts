@@ -20,7 +20,7 @@ function rhd_initial_setup {
 	
 	# Essential installs
 	apt update -y
-	apt install -y postfix git ufw mailutils screen software-properties-common wget letsencrypt less man-db clamav clamav-daemon sasl2-bin python-pip
+	apt install -y postfix git ufw mailutils screen software-properties-common wget letsencrypt less man-db clamav clamav-daemon sasl2-bin python-pip mosh
 	apt upgrade -y
 	apt -o Dpkg::Options::="--force-confold" -o Dpkg::Options::="--force-confdef" dist-upgrade -y 
 	
@@ -48,6 +48,7 @@ function rhd_initial_setup {
 	ufw allow ssh
 	ufw allow http
 	ufw allow https
+	ufw allow mosh
 	ufw enable
 }
 
