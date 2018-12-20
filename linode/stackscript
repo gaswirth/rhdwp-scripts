@@ -2,6 +2,7 @@
 # <UDF name="hostname" label="Hostname" />
 # <UDF name="userpassword" label="User password" />
 # <UDF name="sharedenv" label="Shared environment?" oneOf="Yes,No" default="No" />
+# <UDF name="server_type" label="Apache2 or Nginx?" oneOf="Apache2,Nginx" default="Apache2" />
 # <UDF name="db_password" Label="MySQL root Password" />
 # <UDF name="db_name" Label="Create Database" default="" example="Optionally create this database" />
 # <UDF name="db_user" Label="Create MySQL User" default="" example="Optionally create this user" />
@@ -13,6 +14,7 @@
 # Custom bash helpers
 source <ssinclude StackScriptID="353420">
 
+# Vars
 USERHOME=/home/gaswirth
 
 function rhd_initial_setup {
@@ -40,16 +42,21 @@ function rhd_initial_setup {
 	
 	# Services
 	echo "postfix postfix/main_mailer_type select Internet Site" | debconf-set-selections
-	echo "postfix postfix/mailname string $FQDN" | debconf-set-selections
+	echo "postfix postfix/mailname string ${FQDN}" | debconf-set-selections
 	
 	# Firewall
 	ufw default deny incoming
 	ufw default allow outgoing
 	ufw allow ssh
-	ufw allow http
-	ufw allow https
 	ufw allow mosh
-	ufw enable
+	
+	if [ "${SERVER_TYPE}" = "Apache2" ]; then
+		ufw allow 'Nginx Full'
+	else
+		ufw allow http
+		ufw allow https
+		ufw enable	
+	fi
 }
 
 
@@ -58,7 +65,7 @@ function rhd_users_setup {
 	# Set up gaswirth and foy users
 	apt install -y sudo
 	adduser gaswirth --disabled-password --gecos ""
-	echo -e "$USERPASSWORD\n$USERPASSWORD" | passwd gaswirth
+	echo -e "${USERPASSWORD}\n${USERPASSWORD}" | passwd gaswirth
 	usermod -aG sudo gaswirth
 	
 	adduser foy --disabled-password --gecos ""
@@ -68,17 +75,17 @@ function rhd_users_setup {
 	
 	# Install user pubkeys
 	# Generate SSH keys for gaswirth
-	mkdir {"$USERHOME"/.ssh,/home/foy/.ssh}
-	touch {"$USERHOME"/.ssh/authorized_keys,/home/foy/.ssh/authorized_keys}
-	chmod 700 "$USERHOME"/.ssh /home/foy/.ssh
-	chmod 600 "$USERHOME"/.ssh/authorized_keys /home/foy/.ssh/authorized_keys
-	chown -R gaswirth:gaswirth "$USERHOME"/.ssh
+	mkdir {"${USERHOME}"/.ssh,/home/foy/.ssh}
+	touch {"${USERHOME}"/.ssh/authorized_keys,/home/foy/.ssh/authorized_keys}
+	chmod 700 "${USERHOME}"/.ssh /home/foy/.ssh
+	chmod 600 "${USERHOME}"/.ssh/authorized_keys /home/foy/.ssh/authorized_keys
+	chown -R gaswirth:gaswirth "${USERHOME}"/.ssh
 	chown -R foy:foy /home/foy/.ssh
-	sudo -u gaswirth ssh-keygen -f "$USERHOME"/.ssh/id_rsa -N ''
+	sudo -u gaswirth ssh-keygen -f "${USERHOME}"/.ssh/id_rsa -N ''
 	
 	#gaswirth
-	echo "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC79KWiV0WjBJV8c6AgJnonh12jlVr//3e23of+ADCfgNMasIB8UT9H+xM1zeBh8GmzsrrI4FfiGhhvawa6gyFgbJsSReKWJbsoqFYzUYTDulECsO/iTO438lYIdu4Jsobm+1UsNOX6p3u2zXCrfj1ItLUSGT/dFwTizZIXmktrrg8icW3uFcPieVUqC1qVGsznIgYPDUhPIDLeEELzU87fOfy49YuTZ/M10a4Y8zIv9klzno27RZm90OTA4eqZ1VA+7soWo3TREzhY3X/ZQHC2kdhaseAgUdPfm1hxFg7Cc+Czs6+lAwcA1WhPMAdBKteq5ovbAvphOpQIuVVPkQ+1 gaswirth@Frankengassy.local" >> "$USERHOME"/.ssh/authorized_keys
-	echo "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDbTWzq9yXe8A52N/HzINynxX+miY1zLoh2yTKXxzaJ/OdZGcpMFXWTdy8X+RHtOBIzrOD8oNeQGnEZVzKOYnJQBM1UhUztuJkjn2BM5KCh4LhKOhdn6XjrF8WfKN3P/rcjG0E9IREMKDvtQvdFIqaC2FNkKnVDtan5l3ga1493pckImDO1+E+qwfc3n/XsXj9kHXJ4di9CQ7Y8FI/ODvRq2m+/cZea9RZqHSPYjzhoH2/ol9w5ihLYb9L6sEEaGHn/Xr03bS5paAGV6QG4l2+4UuefLfrgUv4oYx1VVHwejrg26ickU9tuOFCvrOq4eQq4VTCkmEzYtFf/TdhCg33/ gaswirth@Gassybook.local" >> "$USERHOME"/.ssh/authorized_keys
+	echo "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC79KWiV0WjBJV8c6AgJnonh12jlVr//3e23of+ADCfgNMasIB8UT9H+xM1zeBh8GmzsrrI4FfiGhhvawa6gyFgbJsSReKWJbsoqFYzUYTDulECsO/iTO438lYIdu4Jsobm+1UsNOX6p3u2zXCrfj1ItLUSGT/dFwTizZIXmktrrg8icW3uFcPieVUqC1qVGsznIgYPDUhPIDLeEELzU87fOfy49YuTZ/M10a4Y8zIv9klzno27RZm90OTA4eqZ1VA+7soWo3TREzhY3X/ZQHC2kdhaseAgUdPfm1hxFg7Cc+Czs6+lAwcA1WhPMAdBKteq5ovbAvphOpQIuVVPkQ+1 gaswirth@Frankengassy.local" >> "${USERHOME}"/.ssh/authorized_keys
+	echo "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDbTWzq9yXe8A52N/HzINynxX+miY1zLoh2yTKXxzaJ/OdZGcpMFXWTdy8X+RHtOBIzrOD8oNeQGnEZVzKOYnJQBM1UhUztuJkjn2BM5KCh4LhKOhdn6XjrF8WfKN3P/rcjG0E9IREMKDvtQvdFIqaC2FNkKnVDtan5l3ga1493pckImDO1+E+qwfc3n/XsXj9kHXJ4di9CQ7Y8FI/ODvRq2m+/cZea9RZqHSPYjzhoH2/ol9w5ihLYb9L6sEEaGHn/Xr03bS5paAGV6QG4l2+4UuefLfrgUv4oYx1VVHwejrg26ickU9tuOFCvrOq4eQq4VTCkmEzYtFf/TdhCg33/ gaswirth@Gassybook.local" >> "${USERHOME}"/.ssh/authorized_keys
 	
 	#foy
 	echo "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDTvprX8q2H13YwUtbtaIiBk6MT8is8cb4IJJitZQ3DrQ4IpmLulepxKFPdAqzUE2wxCfU8xmXzC2uIq/VGp02dbVOzT2bHyi9XAJTGX4s7hsVyACPXeSHW30dpdHYrLPbEBLx9TY7ODg/sZ/wLb7OAACglLHlxn7/KkRfWyS2XpCWjCzpLK2koC2NpvAFqyue18cBZ37Jm/fIArPiiYxV3JCzAfkStAf14iv4UjRZ0UyJqN2XCYML+Lplo2ltvSffRYTuFxrzszJNkfLuKVx5Gagx7V4P/+GYKpBLAmHpIKTQjEoIqxcA7kNfGOBIAWK21z9ZzlRQGnhO6kqXOPhur foy@Ryan-Foys-Macbook-Pro-2.local" > /home/foy/.ssh/authorized_keys
@@ -91,15 +98,15 @@ function rhd_users_setup {
 
 function rhd_user_scripts {
 	# Create ~/scripts directory
-	if [ ! -d "$USERHOME"/scripts ]; then
-		mkdir "$USERHOME"/scripts
+	if [ ! -d "${USERHOME}"/scripts ]; then
+		mkdir "${USERHOME}"/scripts
 	fi
 	
 	# Install mysqltuner.pl
-	wget http://mysqltuner.pl/ -O "$USERHOME"/scripts/mysqltuner/mysqltuner.pl
-	wget https://raw.githubusercontent.com/major/MySQLTuner-perl/master/basic_passwords.txt -O "$USERHOME"/scripts/mysqltuner/basic_passwords.txt
-	wget https://raw.githubusercontent.com/major/MySQLTuner-perl/master/vulnerabilities.csv -O "$USERHOME"/scripts/mysqltuner/vulnerabilities.csv
-	chmod +x "$USERHOME"/scripts/mysqltuner/mysqltuner.pl
+	wget http://mysqltuner.pl/ -O "${USERHOME}"/scripts/mysqltuner/mysqltuner.pl
+	wget https://raw.githubusercontent.com/major/MySQLTuner-perl/master/basic_passwords.txt -O "${USERHOME}"/scripts/mysqltuner/basic_passwords.txt
+	wget https://raw.githubusercontent.com/major/MySQLTuner-perl/master/vulnerabilities.csv -O "${USERHOME}"/scripts/mysqltuner/vulnerabilities.csv
+	chmod +x "${USERHOME}"/scripts/mysqltuner/mysqltuner.pl
 	
 	# Post setup operations
 	cd /home/gaswirth || exit
@@ -114,7 +121,7 @@ function rhd_cron_setup {
 	chown -R www-data:www-data /usr/local/bin/rhd_wp_helper
 	chmod 774 /usr/local/bin/rhd_wp_helper/*.sh
 	
-	if [ "$SHAREDENV" = "Yes" ]; then
+	if [ "${SHAREDENV}" = "Yes" ]; then
 		HELPER="run_wp_helper.sh"
 		LOGFILES="/var/www/public_html/*/log/*.log"
 	else
@@ -137,11 +144,11 @@ function rhd_cron_setup {
 	cat > /home/gaswirth/.my.cnf <<- EOF
 		[mysqldump]
 		user=root
-		password="$DB_PASSWORD"
+		password="${DB_PASSWORD}"
 	EOF
-	chown gaswirth:gaswirth "$USERHOME"/.my.cnf
-	chmod 600 "$USERHOME"/.my.cnf
-	cp "$USERHOME"/.my.cnf /root/.my.cnf
+	chown gaswirth:gaswirth "${USERHOME}"/.my.cnf
+	chmod 600 "${USERHOME}"/.my.cnf
+	cp "${USERHOME}"/.my.cnf /root/.my.cnf
 	chown root:root /root/.my.cnf
 	
 	# logrotate
@@ -150,7 +157,7 @@ function rhd_cron_setup {
 		logrotate /etc/logrotate.conf
 	EOF
 	cat > /etc/logrotate.d/public_html <<- EOF
-		$LOGFILES {
+		"${LOGFILES}" {
 		  weekly
 		  rotate 3
 		  compress
@@ -168,7 +175,7 @@ function rhd_cron_setup {
 	# root
 	cat > /var/spool/cron/crontabs/root <<- EOF
 		0 0 1,15 * * letsencrypt renew --agree-tos --m admin@roundhouse-designs.com
-		0 */6 * * * bash "$USERHOME"/scripts/restic-backup.sh >/dev/null 2>&1
+		0 */6 * * * bash "${USERHOME}"/scripts/restic-backup.sh >/dev/null 2>&1
 		
 		# Termius mosh server start
 		@reboot mosh-server new -s -c 256 -l LANG=en_US.UTF-8
@@ -176,7 +183,7 @@ function rhd_cron_setup {
 	
 	# www-data
 	cat > /var/spool/cron/crontabs/www-data <<- EOF
-		0 0 * * * /usr/local/bin/rhd_wp_helper/$HELPER
+		0 0 * * * /usr/local/bin/rhd_wp_helper/"${HELPER}"
 	EOF
 	
 	rhd_user_scripts
@@ -184,39 +191,54 @@ function rhd_cron_setup {
 
 
 function rhd_environment_setup {
-	# Apache2
-	apt install -y apache2
-	a2dissite 000-default.conf
-	apache_tune 40
-	mkdir /var/www/{public,log}
-	rm -rf /var/www/html
+	# Add me to www-data group and remove default dir
 	usermod -aG www-data gaswirth
+	rm -rf /var/www/html
+	if [ "${SHAREDENV}" = "Yes" ]; then
+		mkdir /var/www/{public_html,log}
+	else
+		mkdir /var/www/{public,log}
+	fi
+	
+	if [ "${SERVER_TYPE}" = "Apache2" ]; then
+		# Apache2
+		apt install -y apache2
+		a2dissite 000-default.conf
+		apache_tune 40
+	else
+		# Nginx
+		apt install -y nginx
+	fi
 	
 	# PHP
 	apt update
 	
 	apt install -y php"${PHP_VER}" libapache2-mod-php"${PHP_VER}" php"${PHP_VER}"-mysql php"${PHP_VER}"-json php"${PHP_VER}"-mbstring php"${PHP_VER}"-xml php"${PHP_VER}"-xmlrpc php"${PHP_VER}"-curl php"${PHP_VER}"-gd php"${PHP_VER}"-imagick
 	
-	if (( $(echo "$PHP_VER > 7.1" | bc -l) )); then	
+	if [ "${SERVER_TYPE}" = "Apache2" ]; then
+		apt install -y php"${PHP_VER}"-fpm
+	fi
+	
+	if (( $(echo "${PHP_VER} > 7.1" | bc -l) )); then	
 		apt install -y php"${PHP_VER}"-mcrypt
 	fi
 	
 	# AllowOverride All
 	sed -i.bak '/<Directory \/var\/www\/>/,/<\/Directory>/ s/AllowOverride None/AllowOverride All/' /etc/apache2/apache2.conf
 	
-	if [ "$SHAREDENV" != "Yes" ]; then
-		sed -i.orig 's/post_max_size = [0-9]*M/post_max_size = 20M/' /etc/php/"$PHP_VER"/apache2/php.ini
-		sed -i.orig 's/upload_max_filesize = [0-9]*M/upload_max_filesize = 20M/' /etc/php/"$PHP_VER"/apache2/php.ini
+	if [ "${SHAREDENV}" != "Yes" ]; then
+		sed -i.orig 's/post_max_size = [0-9]*M/post_max_size = 20M/' /etc/php/"${PHP_VER}"/apache2/php.ini
+		sed -i.orig 's/upload_max_filesize = [0-9]*M/upload_max_filesize = 20M/' /etc/php/"${PHP_VER}"/apache2/php.ini
 	fi
 	
 	# MySQL
-	if [ -n "$DB_PASSWORD" ]; then
-		mysql_install "$DB_PASSWORD" && mysql_tune 40
+	if [ -n "${DB_PASSWORD}" ]; then
+		mysql_install "${DB_PASSWORD}" && mysql_tune 40
 		
-		if [ -n "$DB_USER" ] || [ -n "$DB_USER_PASSWORD" ]; then
-			mysql_create_database "$DB_PASSWORD" "$DB_NAME"
-			mysql_create_user "$DB_PASSWORD" "$DB_USER" "$DB_USER_PASSWORD"
-			mysql_grant_user "$DB_PASSWORD" "$DB_USER" "$DB_NAME"
+		if [ -n "${DB_USER}" ] || [ -n "${DB_USER_PASSWORD}" ]; then
+			mysql_create_database "${DB_PASSWORD}" "${DB_NAME}"
+			mysql_create_user "${DB_PASSWORD}" "${DB_USER}" "${DB_USER_PASSWORD}"
+			mysql_grant_user "${DB_PASSWORD}" "${DB_USER}" "${DB_NAME}"
 		fi
 	fi
 	
@@ -247,43 +269,188 @@ function rhd_environment_setup {
 
 
 function rhd_vhost_setup {
-	if [ -n "$DOMAIN" ]; then
-	
-		#VirtualHost
-		if [ -e "/etc/apache2/sites-available/""$DOMAIN"".conf" ]; then
-			echo "/etc/apache2/sites-available/""$DOMAIN"".conf already exists"
+	if [ -n "${DOMAIN}" ]; then
+		if [ "${SERVER_TYPE}" = "Apache2" ]; then
+			# Apache2
+			# VirtualHost
+			if [ -e "/etc/apache2/sites-available/""${DOMAIN}"".conf" ]; then
+				echo "/etc/apache2/sites-available/""${DOMAIN}"".conf already exists"
+			else
+				cat > "/etc/apache2/sites-available/${DOMAIN}.conf" <<- EOF			
+					<VirtualHost *:80>
+					  ServerName ${HOSTNAME}
+					  ServerAlias www.${HOSTNAME}
+					  DirectoryIndex index.html index.php
+					  DocumentRoot /var/www/public
+					  LogLevel warn
+					  ErrorLog /var/www/log/error.log
+					  CustomLog /var/www/log/access.log combined
+					</VirtualHost>
+					
+					<VirtualHost *:443>
+					  ServerName ${HOSTNAME}
+					  ServerAlias www.${HOSTNAME}
+					  DirectoryIndex index.html index.php
+					  DocumentRoot /var/www/public
+					  LogLevel warn
+					  ErrorLog /var/www/log/error.log
+					  CustomLog /var/www/log/acess.log combined
+					
+					  # SSLEngine On
+					  # SSLCertificateFile /etc/letsencrypt/live/${HOSTNAME}/fullchain.pem
+					  # SSLCertificateKeyFile /etc/letsencrypt/live/${HOSTNAME}/privkey.pem
+					</VirtualHost>
+				EOF
+			fi
+			a2ensite "${DOMAIN}".conf
 		else
-			cat > "/etc/apache2/sites-available/$DOMAIN.conf" <<- EOF			
-				# domain: $DOMAIN
-				# public: /var/www/public/
-				
-				<VirtualHost *:80>
-				  ServerName $HOSTNAME
-				  ServerAlias www.$HOSTNAME
-				  DirectoryIndex index.html index.php
-				  DocumentRoot /var/www/public
-				  LogLevel warn
-				  ErrorLog /var/www/log/error.log
-				  CustomLog /var/www/log/access.log combined
-				</VirtualHost>
-				
-				<VirtualHost *:443>
-				  ServerName $HOSTNAME
-				  ServerAlias www.$HOSTNAME
-				  DirectoryIndex index.html index.php
-				  DocumentRoot /var/www/public
-				  LogLevel warn
-				  ErrorLog /var/www/log/error.log
-				  CustomLog /var/www/log/acess.log combined
-				
-				  # SSLEngine On
-				  # SSLCertificateFile /etc/letsencrypt/live/$HOSTNAME/fullchain.pem
-				  # SSLCertificateKeyFile /etc/letsencrypt/live/$HOSTNAME/privkey.pem
-				</VirtualHost>
+			# Nginx
+			if [ -e "/etc/nginx/sites-available/${DOMAIN}.conf" ]; then
+				echo "/etc/nginx/sites-available/${DOMAIN}.conf already exists"
+			else
+				cat > "/etc/nginx/sites-available/${DOMAIN}.conf" <<- EOF
+					# Redirect HTTP -> HTTPS
+					upstream php {
+					    server unix:/tmp/php-cgi.socket;
+					    server 127.0.0.1:9000;
+					}
+					
+					server {
+					    listen 80;
+					    server_name www.${DOMAIN} ${DOMAIN};
+					
+					    include snippets/letsencrypt.conf;
+					    return 301 https://${DOMAIN}\$request_uri;
+					}
+					
+					# Redirect NON WWW -> WWW
+					server {
+					    listen 443 ssl http2;
+					    server_name ${DOMAIN};
+					
+					    ssl_certificate /etc/letsencrypt/live/${DOMAIN}/fullchain.pem;
+					    ssl_certificate_key /etc/letsencrypt/live/${DOMAIN}/privkey.pem;
+					    ssl_trusted_certificate /etc/letsencrypt/live/${DOMAIN}/chain.pem;
+					    include snippets/ssl.conf;
+					
+					    return 301 https://www.${DOMAIN}\$request_uri;
+					}
+					
+					server {
+					    listen 443 ssl http2;
+					    server_name www.${DOMAIN};
+					
+					    root /var/www/public;
+					    index index.php;
+					
+					    # SSL parameters
+					    ssl_certificate /etc/letsencrypt/live/${DOMAIN}/fullchain.pem;
+					    ssl_certificate_key /etc/letsencrypt/live/${DOMAIN}/privkey.pem;
+					    ssl_trusted_certificate /etc/letsencrypt/live/${DOMAIN}/chain.pem;
+					    include snippets/ssl.conf;
+					    include snippets/letsencrypt.conf;
+					    include snippets/wordpress.conf;
+					
+					    # log files
+					    access_log /var/www/log/access.log;
+					    error_log /var/www/log/error.log;
+					
+					    location / {
+					        try_files \$uri \$uri/ /index.php?\$args;
+					    }
+					
+					    include snippets/wp-defender.conf;
+					    include snippets/wphb-gzip.conf;
+					
+					    location ~ \.php$ {
+					        include snippets/fastcgi-php.conf;
+					        fastcgi_pass unix:/run/php/php7.2-fpm.sock;
+					    }
+					
+					    location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg)$ {
+					        expires max;
+					        log_not_found off;
+					    }
+					
+					}
+
+				EOF
+			fi
+			
+			# SSL and Letsencrypt blocks
+			cat > "/etc/nginx/snippets/letsencrypt.conf" <<- EOF
+				location ^~ /.well-known/acme-challenge/ {
+				  allow all;
+				  root /var/lib/letsencrypt/;
+				  default_type "text/plain";
+				  try_files \$uri =404;
+				}
 			EOF
+			
+			cat > "/etc/nginx/snippets/ssl.conf" <<- EOF
+				ssl_dhparam /etc/ssl/certs/dhparam.pem;
+
+				ssl_session_timeout 1d;
+				ssl_session_cache shared:SSL:50m;
+				ssl_session_tickets off;
+				
+				ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
+				ssl_ciphers 'ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES256-SHA384:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES256-SHA384:ECDHE-ECDSA-AES256-SHA:ECDHE-RSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA:DHE-RSA-AES256-SHA256:DHE-RSA-AES256-SHA:ECDHE-ECDSA-DES-CBC3-SHA:ECDHE-RSA-DES-CBC3-SHA:EDH-RSA-DES-CBC3-SHA:AES128-GCM-SHA256:AES256-GCM-SHA384:AES128-SHA256:AES256-SHA256:AES128-SHA:AES256-SHA:DES-CBC3-SHA:!DSS';
+				ssl_prefer_server_ciphers on;
+				
+				ssl_stapling on;
+				ssl_stapling_verify on;
+				resolver 1.1.1.1 1.0.0.1 valid=300s;
+				resolver_timeout 30s;
+				
+				add_header Strict-Transport-Security "max-age=15768000; includeSubdomains; preload";
+				add_header X-Frame-Options SAMEORIGIN;
+				add_header X-Content-Type-Options nosniff;
+			EOF
+			
+			# WordPress block
+			cat > "/etc/nginx/snippets/wordpress.conf" <<- EOF
+				# Global restrictions configuration file.
+				# Designed to be included in any server {} block.
+				location = /favicon.ico {
+				  log_not_found off;
+				  access_log off;
+				}
+				# robots.txt fallback to index.php
+				location = /robots.txt {
+				  # Some WordPress plugin gererate robots.txt file
+				  allow all;
+				  try_files \$uri \$uri/ /index.php?\$args @robots;
+				  access_log off;
+				  log_not_found off;
+				}
+				# additional fallback if robots.txt doesn't exist
+				location @robots {
+				  return 200 "User-agent: *\nDisallow: /wp-admin/\nAllow: /wp-admin/admin-ajax.php\n";
+				}
+				# Deny all attempts to access hidden files such as .htaccess, .htpasswd, .DS_Store (Mac) excepted .well-known directory.
+				# Keep logging the requests to parse later (or to pass to firewall utilities such as fail2ban)
+				location ~ /\.(?!well-known\/) {
+				  deny all;
+				}
+				# Deny access to any files with a .php extension in the uploads directory for the single site
+				location /wp-content/uploads {
+				  location ~ \.php\$ {
+				    deny all;
+				  }
+				}
+				
+				# Deny access to any files with a .php extension in the uploads directory
+				# Works in sub-directory installs and also in multisite network
+				# Keep logging the requests to parse later (or to pass to firewall utilities such as fail2ban)
+				location ~* /(?:uploads|files)/.*\.php\$ {
+				  deny all;
+				}
+			EOF
+			
+			# Symlink to activate site
+			ln -s "/etc/nginx/sites-available/${DOMAIN}.conf" "/etc/nginx/sites-enabled/${DOMAIN}.conf"
 		fi
-		a2ensite "$DOMAIN".conf
-	
 	fi
 }
 
@@ -300,14 +467,14 @@ function rhd_goodstuff {
 	sed -i -e 's/^#PS1=/PS1=/' /root/.bashrc # enable the colorful root bash prompt
 	
 	# Ensure proper permissions, just in case I fucked something up...
-	chown gaswirth:gaswirth "$USERHOME"
+	chown gaswirth:gaswirth "${USERHOME}"
 	chown foy:foy /home/foy
 	
 	# Restart services
 	systemctl restart apache2 
 
 	# Nick's Aliases
-	cat > "$USERHOME"/.bash_aliases <<- EOF				
+	cat > "${USERHOME}"/.bash_aliases <<- EOF				
 		alias a2restart='sudo systemctl restart apache2.service'
 		alias a2reload='sudo systemctl reload apache2.service'
 		alias update='sudo apt update && sudo apt upgrade --show-upgraded --assume-yes'
@@ -316,10 +483,10 @@ function rhd_goodstuff {
 	EOF
 
 	# `rhd` shared/private setup
-	if [ "$SHAREDENV" = "Yes" ]; then
-		echo "alias rhd='cd /var/www/public_html'" >> "$USERHOME"/.bash_aliases
+	if [ "${SHAREDENV}" = "Yes" ]; then
+		echo "alias rhd='cd /var/www/public_html'" >> "${USERHOME}"/.bash_aliases
 	else
-		echo "alias rhd='cd /var/www/public'" >> "$USERHOME"/.bash_aliases
+		echo "alias rhd='cd /var/www/public'" >> "${USERHOME}"/.bash_aliases
 	fi
 
 	chown gaswirth:gaswirth .bash_aliases
@@ -328,7 +495,7 @@ function rhd_goodstuff {
 	# restarts services that have a file in /tmp/needs-restart/
 	restartServices
 	
-	if [ "$MIGRATION" = "Yes" ]; then
+	if [ "${MIGRATION}" = "Yes" ]; then
 		rhd_prep_migration
 	fi;
 	
@@ -351,12 +518,12 @@ function rhd_prep_migration {
 ##################
 IP=$(systemPrimaryIPV4)
 IPV6=$(systemPrimaryIPV6)
-FQDN="$HOSTNAME.roundhouse-designs.com"
+FQDN="${HOSTNAME}.roundhouse-designs.com"
 
 # System setup
-hostnamectl set-hostname "$HOSTNAME"
-echo "$IP	$FQDN	$HOSTNAME" >> /etc/hosts
-echo "$IPV6	$FQDN	$HOSTNAME" >> /etc/hosts
+hostnamectl set-hostname "${HOSTNAME}"
+echo "${IP}	${FQDN}	${HOSTNAME}" >> /etc/hosts
+echo "${IPV6}	${FQDN}	${HOSTNAME}" >> /etc/hosts
 
 # Roll it out
 rhd_initial_setup
