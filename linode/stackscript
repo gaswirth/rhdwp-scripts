@@ -311,69 +311,67 @@ function rhd_vhost_setup {
 				cat > "/etc/nginx/sites-available/${DOMAIN}.conf" <<- EOF
 					# Redirect HTTP -> HTTPS
 					upstream php {
-					    server unix:/tmp/php-cgi.socket;
-					    server 127.0.0.1:9000;
+					  server unix:/tmp/php-cgi.socket;
+					  server 127.0.0.1:9000;
 					}
 					
 					server {
-					    listen 80;
-					    server_name www.${DOMAIN} ${DOMAIN};
+					  listen 80;
+					  server_name www.${DOMAIN} ${DOMAIN};
 					
-					    include snippets/letsencrypt.conf;
-					    return 301 https://${DOMAIN}\$request_uri;
+					  include snippets/letsencrypt.conf;
+					  return 301 https://${DOMAIN}\$request_uri;
 					}
 					
 					# Redirect NON WWW -> WWW
 					server {
-					    listen 443 ssl http2;
-					    server_name ${DOMAIN};
+					  listen 443 ssl http2;
+					  server_name ${DOMAIN};
 					
-					    ssl_certificate /etc/letsencrypt/live/${DOMAIN}/fullchain.pem;
-					    ssl_certificate_key /etc/letsencrypt/live/${DOMAIN}/privkey.pem;
-					    ssl_trusted_certificate /etc/letsencrypt/live/${DOMAIN}/chain.pem;
-					    include snippets/ssl.conf;
+					  ssl_certificate /etc/letsencrypt/live/${DOMAIN}/fullchain.pem;
+					  ssl_certificate_key /etc/letsencrypt/live/${DOMAIN}/privkey.pem;
+					  ssl_trusted_certificate /etc/letsencrypt/live/${DOMAIN}/chain.pem;
+					  include snippets/ssl.conf;
 					
-					    return 301 https://www.${DOMAIN}\$request_uri;
+					  return 301 https://www.${DOMAIN}\$request_uri;
 					}
 					
 					server {
-					    listen 443 ssl http2;
-					    server_name www.${DOMAIN};
+					  listen 443 ssl http2;
+					  server_name www.${DOMAIN};
 					
-					    root /var/www/public;
-					    index index.php;
+					  root /var/www/public;
+					  index index.php;
 					
-					    # SSL parameters
-					    ssl_certificate /etc/letsencrypt/live/${DOMAIN}/fullchain.pem;
-					    ssl_certificate_key /etc/letsencrypt/live/${DOMAIN}/privkey.pem;
-					    ssl_trusted_certificate /etc/letsencrypt/live/${DOMAIN}/chain.pem;
-					    include snippets/ssl.conf;
-					    include snippets/letsencrypt.conf;
-					    include snippets/wordpress.conf;
+					  # SSL parameters
+					  ssl_certificate /etc/letsencrypt/live/${DOMAIN}/fullchain.pem;
+					  ssl_certificate_key /etc/letsencrypt/live/${DOMAIN}/privkey.pem;
+					  ssl_trusted_certificate /etc/letsencrypt/live/${DOMAIN}/chain.pem;
+					  include snippets/ssl.conf;
+					  include snippets/letsencrypt.conf;
+					  include snippets/wordpress.conf;
 					
-					    # log files
-					    access_log /var/www/log/access.log;
-					    error_log /var/www/log/error.log;
+					  # log files
+					  access_log /var/www/log/access.log;
+					  error_log /var/www/log/error.log;
 					
-					    location / {
-					        try_files \$uri \$uri/ /index.php?\$args;
-					    }
+					  location / {
+					      try_files \$uri \$uri/ /index.php?\$args;
+					  }
 					
-					    include snippets/wp-defender.conf;
-					    include snippets/wphb-gzip.conf;
+					  include snippets/wp-defender.conf;
+					  include snippets/wphb-gzip.conf;
 					
-					    location ~ \.php$ {
-					        include snippets/fastcgi-php.conf;
-					        fastcgi_pass unix:/run/php/php7.2-fpm.sock;
-					    }
+					  location ~ \.php$ {
+					    include snippets/fastcgi-php.conf;
+					    fastcgi_pass unix:/run/php/php7.2-fpm.sock;
+					  }
 					
-					    location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg)$ {
-					        expires max;
-					        log_not_found off;
-					    }
-					
+					  location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg)$ {
+					    expires max;
+					    log_not_found off;
+					  }
 					}
-
 				EOF
 			fi
 			
