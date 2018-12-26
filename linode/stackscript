@@ -11,6 +11,8 @@
 # <UDF name="php_ver" Label="PHP Version" oneOf="7.0,7.1,7.2" default="7.2" />
 # <UDF name="migration" Label="Migrating from another Linode?" oneOf="Yes,No" default="No" />
 
+# STACKSCRIPT_ID: 179947
+
 # Custom bash helpers
 source <ssinclude StackScriptID="353420">
 
@@ -278,8 +280,8 @@ function rhd_vhost_setup {
 			else
 				cat > "/etc/apache2/sites-available/${DOMAIN}.conf" <<- EOF			
 					<VirtualHost *:80>
-					  ServerName ${HOSTNAME}
-					  ServerAlias www.${HOSTNAME}
+					  ServerName ${DOMAIN}
+					  ServerAlias www.${DOMAIN}
 					  DirectoryIndex index.html index.php
 					  DocumentRoot /var/www/public
 					  LogLevel warn
@@ -288,8 +290,8 @@ function rhd_vhost_setup {
 					</VirtualHost>
 					
 					<VirtualHost *:443>
-					  ServerName ${HOSTNAME}
-					  ServerAlias www.${HOSTNAME}
+					  ServerName ${DOMAIN}
+					  ServerAlias www.${DOMAIN}
 					  DirectoryIndex index.html index.php
 					  DocumentRoot /var/www/public
 					  LogLevel warn
