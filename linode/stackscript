@@ -307,6 +307,10 @@ function rhd_vhost_setup {
 			a2ensite "${DOMAIN}".conf
 		else
 			# Nginx
+			## SSL/Diffie-Helman
+			openssl dhparam -out /etc/ssl/certs/dhparam.pem 2048
+			
+			## Site definition
 			if [ -e "/etc/nginx/sites-available/${DOMAIN}.conf" ]; then
 				echo "/etc/nginx/sites-available/${DOMAIN}.conf already exists"
 			else
