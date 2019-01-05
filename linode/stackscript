@@ -197,17 +197,24 @@ function rhd_environment_setup {
 		apt install -y apache2
 		a2dissite 000-default.conf
 		rm /etc/apache2/sites-available/000-default.conf
+		sudo apt install -y libapache2-mod-php"${PHP_VER}"
 		apache_tune 40
 		
 		# AllowOverride All
 		sed -i.bak '/<Directory \/var\/www\/>/,/<\/Directory>/ s/AllowOverride None/AllowOverride All/' /etc/apache2/apache2.conf
+		
+		# apache2/PHP config
+		if [ "${SHAREDENV}" != "Yes" ]; then
+			sed -i.orig 's/post_max_size = [0-9]*M/post_max_size = 20M/' /etc/php/"${PHP_VER}"/apache2/php.ini
+			sed -i.orig 's/upload_max_filesize = [0-9]*M/upload_max_filesize = 20M/' /etc/php/"${PHP_VER}"/apache2/php.ini
+		fi
 		
 		# Firewall
 		ufw allow http
 		ufw allow https
 		ufw enable	
 	elif [ "${SERVER_TYPE}" = "Nginx" ]; then
-		apt install -y nginx
+		apt install -y nginx php"${PHP_VER}"-fpm
 		
 		# Firewall
 		ufw allow 'Nginx Full'
@@ -216,19 +223,10 @@ function rhd_environment_setup {
 	# PHP
 	apt update
 	
-	apt install -y php"${PHP_VER}" libapache2-mod-php"${PHP_VER}" php"${PHP_VER}"-mysql php"${PHP_VER}"-json php"${PHP_VER}"-mbstring php"${PHP_VER}"-xml php"${PHP_VER}"-xmlrpc php"${PHP_VER}"-curl php"${PHP_VER}"-gd php"${PHP_VER}"-imagick
-	
-	if [ "${SERVER_TYPE}" = "Apache2" ]; then
-		apt install -y php"${PHP_VER}"-fpm
-	fi
+	apt install -y php"${PHP_VER}" php"${PHP_VER}"-mysql php"${PHP_VER}"-json php"${PHP_VER}"-mbstring php"${PHP_VER}"-xml php"${PHP_VER}"-xmlrpc php"${PHP_VER}"-curl php"${PHP_VER}"-gd php"${PHP_VER}"-imagick
 	
 	if (( $(echo "${PHP_VER} > 7.1" | bc -l) )); then	
 		apt install -y php"${PHP_VER}"-mcrypt
-	fi
-	
-	if [ "${SHAREDENV}" != "Yes" ]; then
-		sed -i.orig 's/post_max_size = [0-9]*M/post_max_size = 20M/' /etc/php/"${PHP_VER}"/apache2/php.ini
-		sed -i.orig 's/upload_max_filesize = [0-9]*M/upload_max_filesize = 20M/' /etc/php/"${PHP_VER}"/apache2/php.ini
 	fi
 	
 	# MySQL
@@ -473,7 +471,11 @@ function rhd_goodstuff {
 	chown foy:foy /home/foy
 	
 	# Restart services
-	systemctl restart apache2 
+	if [ "${SERVER_TYPE}" = "Apache2" ]; then
+		systemctl restart apache2 
+	elif [ "${SERVER_TYPE}" = "Nginx" ]; then
+		systemctl restart nginx
+	fi
 
 	# Nick's Aliases
 	cat > "${USERHOME}"/.bash_aliases <<- EOF				
@@ -509,8 +511,15 @@ function rhd_prep_migration {
 	chown -R gaswirth:www-data /var/www
 	rmdir /var/www/public
 	rmdir /var/www/public_html
-	rm /etc/apache2/sites-available/*
-	mv /etc/apache2/mods-available/mpm_prefork.conf /etc/apache2/mods-available/mpm_prefork.conf.orig
+	
+	if [ -d "/etc/apache2/sites-available" ]; then
+		rm /etc/apache2/sites-available/*
+	fi
+	
+	if [ -e "/etc/apache2/mods-available/mpm_prefork.conf" ]; then
+		mv /etc/apache2/mods-available/mpm_prefork.conf /etc/apache2/mods-available/mpm_prefork.conf.orig
+	fi
+	
 	cp /etc/hosts /etc/hosts.orig
 }
 
