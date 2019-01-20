@@ -19,8 +19,6 @@ wpconfig_get_db_name() {
         echo "${x}"
 }
 
-sudo rsync -avze ssh --exclude="*.log" "$dir/public/" gaswirth@bertha:/tmp/"$dir"
-
 # ensure wp-config.php is in the right place...
 if [ ! -f "$dir/public/wp-config.php" ]; then
 	if  [ -f "$dir/wp-config.php" ]; then
@@ -32,5 +30,8 @@ if [ ! -f "$dir/public/wp-config.php" ]; then
 fi
 
 db_name=$(wpconfig_get_db_name)
+
+# do this thang
+sudo rsync -avze ssh --exclude="*.log" "$dir/public/" gaswirth@bertha:/tmp/"$dir"
 mysqldump --add-drop-table "$db_name" | ssh gaswirth@bertha "cat > /tmp/${db_name}.sql"
 echo "Done."
