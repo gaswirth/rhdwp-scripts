@@ -22,7 +22,7 @@ wpconfig_get_db_name() {
 # ensure wp-config.php is in the right place...
 if [ ! -f "$dir/public/wp-config.php" ]; then
 	if  [ -f "$dir/wp-config.php" ]; then
-		mv "$dir/wp-config.php" "$dir/public/wp-config.php"
+		sudo mv "$dir/wp-config.php" "$dir/public/wp-config.php"
 	else
 		echo "wp-config.php error. Please check manually and try again."
 		exit 1
