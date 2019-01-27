@@ -165,7 +165,16 @@ function rhd_goodstuff {
 	chown gaswirth:gaswirth {/srv/www/,/srv/scripts}
 	git clone git@github.com:gaswirth/rhdwp-docker-nginx-proxy /srv/www/nginx-proxy
 	git clone git@github.com:gaswirth/rhdwp-docker-host-scripts /srv/scripts
-	
+	git clone git@github.com:evertramos/docker-portainer-letsencrypt.git /srv/www/portainer
+	sed -i -E \
+		-e "s|PORTAINER_DATA_PATH=(.*)$|PORTAINER_DATA_PATH=/srv/www/portainer/data|" \
+		-e "s|ADMIN_PASSWORD=(.*)$|ADMIN_PASSWORD=password|" \
+		-e "s|DOMAINS=(.*)$|DOMAINS=$(hostname).portainer.roundhouse-designs.com|" \
+		-e "s|MAIN_DOMAIN=(.*)$|MAIN_DOMAIN=$(hostname).portainer.roundhouse-designs.com\nVIRTUAL_HOST="'"$MAIN_DOMAIN"'"|" \
+		-e "s|LETSENCRYPT_EMAIL=(.*)$|LETSENCRYPT_EMAIL=admin@roundhouse-designs.com|" \
+		-e "s|PORTAINER_SSL_PATH=(.*)$|PORTAINER_SSL_PATH=/srv/www/nginx-proxy/certs|" \
+		-e "s|NETWORK=(.*)$|NETWORK=nginx-proxy|" .env
+
 	chown gaswirth:gaswirth .bash_aliases
 	chown gaswirth:gaswirth scripts
 	
