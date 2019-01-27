@@ -12,7 +12,7 @@ echo ""
 
 mkdir /home/gaswirth/scripts
 cd /home/gaswirth/scripts
-wget https://raw.githubusercontent.com/gaswirth/rhdwp-scripts/forked-repos/restic-backup.sh
+wget https://raw.githubusercontent.com/gaswirth/rhdwp-scripts/docker-host/restic-backup.sh
 chmod u+x restic-backup.sh
 sudo chown gaswirth:gaswirth restic-backup.sh
 
