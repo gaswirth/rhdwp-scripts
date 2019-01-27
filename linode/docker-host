@@ -113,19 +113,6 @@ function rhd_user_scripts {
 
 
 function rhd_cron_setup {
-	{ \
-		echo '#!/bin/bash'; \
-		echo 'for d in /srv/www/*; do'; \
-		echo '  dirname="${d##*/}"'; \
-		echo '  if [ -d "$d" ] && [ "$dirname" != "nginx-proxy" ] && [ "$dirname" != "portainer" ]; then'; \
-		echo '    cd "$d" || exit;' \
-		echo '    docker-compose run --rm wp-cli_"$dirname" plugin update --all'; \
-		echo '    docker-compose run --rm wp-cli_"$dirname" theme update --all'; \
-		echo '    docker-compose run --rm wp-cli_"$dirname" core update'; \
-		echo '  fi'; \
-		echo 'done'; \
-	} > /usr/local/bin/rhd_wp_update
-	
 	## Backups
 	pip install --upgrade b2
 	
@@ -145,7 +132,7 @@ function rhd_cron_setup {
 	
 	# gaswirth
 	cat > /var/spool/cron/crontabs/gaswirth <<- EOF
-		0 0 * * * /usr/local/bin/rhd_wp_update
+		0 0 * * * bash /srv/scripts/rhd_wp_update
 	EOF
 	
 	rhd_user_scripts
@@ -155,7 +142,7 @@ function rhd_goodstuff {
 	# apt cleanup
 	apt autoclean -y
 	apt autoremove -y
-
+	
 	# iTerm Shell Integration (macOS)
 	curl -L https://iterm2.com/shell_integration/install_shell_integration_and_utilities.sh | bash
 	
@@ -165,13 +152,14 @@ function rhd_goodstuff {
 	# Ensure proper permissions, just in case I fucked something up...
 	chown gaswirth:gaswirth "${USERHOME}"
 	chown foy:foy /home/foy
-
+	
 	# Nick's Aliases
 	cat > "${USERHOME}"/.bash_aliases <<- EOF				
 		alias update='sudo apt update && sudo apt upgrade --show-upgraded --assume-yes'
 		alias rhd='cd /srv/www/'
+		alias wp='docker-compose run --rm wp-cli_${PWD##*/}'
 	EOF
-
+	
 	# Create webserver environment and helper scripts
 	mkdir {/srv/www/,/srv/scripts}
 	chown gaswirth:gaswirth {/srv/www/,/srv/scripts}
