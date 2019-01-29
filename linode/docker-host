@@ -154,7 +154,7 @@ function rhd_goodstuff {
 	chown foy:foy /home/foy
 	
 	# Nick's Aliases
-	cat > "${USERHOME}"/.bash_aliases <<- EOF				
+	cat > "${USERHOME}"/.bash_aliases <<- EOF
 		alias update='sudo apt update && sudo apt upgrade --show-upgraded --assume-yes'
 		alias rhd='cd /srv/www/'
 		alias wp='docker-compose run --rm wp-cli_${PWD##*/}'
@@ -163,9 +163,8 @@ function rhd_goodstuff {
 	# Create webserver environment and helper scripts
 	mkdir {/srv/www/,/srv/scripts}
 	chown gaswirth:gaswirth {/srv/www/,/srv/scripts}
-	git clone git@github.com:gaswirth/rhdwp-docker-nginx-proxy /srv/www/nginx-proxy
+	git clone git@github.com:gaswirth/rhdwp-traefik traefik
 	git clone git@github.com:gaswirth/rhdwp-docker-host-scripts /srv/scripts
-	git clone git@github.com:evertramos/docker-portainer-letsencrypt.git /srv/www/portainer
 	sed -i -E \
 		-e "s|PORTAINER_DATA_PATH=(.*)$|PORTAINER_DATA_PATH=/srv/www/portainer/data|" \
 		-e "s|ADMIN_PASSWORD=(.*)$|ADMIN_PASSWORD=password|" \
