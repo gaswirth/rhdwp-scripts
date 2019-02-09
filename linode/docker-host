@@ -35,7 +35,9 @@ function rhd_initial_setup {
 		ca-certificates \
 		curl \
 		gnupg-agent \
-		docker-ce
+		docker-ce \
+		apache2-utils \
+		jq
 
 	apt upgrade -y
 	apt -o Dpkg::Options::="--force-confold" -o Dpkg::Options::="--force-confdef" dist-upgrade -y 
