@@ -6,7 +6,6 @@ echo "*****************"
 
 read -p "Site Title: " TITLE
 read -p "Site root (no namespace prefixes): " PROJNAME
-echo "*****************"
 read -p "Database name: " DBNAME
 read -p "Database user: " DBUSER
 read -s -p "Database password: " DBPASS
@@ -15,7 +14,10 @@ echo "*****************"
 read -p "GitHub repository name: " REPONAME
 read -n 1 -s -r -p "Please create a '$REPONAME' GitHub repository, then press any key to continue..."
 echo ""
-
+echo "*****************"
+read -p "Multisite install? Y/N (Default: N)" MULTISITE
+read -p "Send WordPress emails Y/N? (Default: N)" SENDEMAILS
+echo ""
 echo "*******************"
 echo "** Rock and roll **"
 echo "******************"
@@ -56,7 +58,7 @@ PHP
 
 # Complete WP install
 echo "Installing WordPress..."
-wp core install --url="http://dev.roundhouse-designs.com/${PROJNAME}" --title="$TITLE" --admin_user="nick" --admin_email="nick@roundhouse-designs.com"
+wp core install --url="http://dev.roundhouse-designs.com/${PROJNAME}" --title="$TITLE" --admin_user="nick" --admin_email="nick@roundhouse-designs.com" --skip-email
 
 # Generate .htaccess and set rewrite structure
 wp rewrite structure '/%postname%/'
@@ -69,16 +71,17 @@ cd "$THEMESDIR"
 rm -rf twenty*
 
 # Download the RHDWP base
-git clone git@github.com:gaswirth/rhdwp.git rhdwp
+git clone git@github.com:gaswirth/rhdwp.git rhdwp && cd rhdwp
 
-# Yarn setup
-yarn config set init-license GPL-2.0
-yarn config set init-main Gruntfile.js
-yarn config set init-version 1.0
-yarn init --yes 
-yarn add grunt grunt-contrib-stylus grunt-contrib-watch grunt-contrib-jshint livereload-js --dev
-yarn add fitvids --save
-yarn install
+# NPM setup
+npm config set init-license GPL-2.0
+npm config set init-version 1.0.0
+npm config set init-author-name "Nick Gaswirth"
+npm config set init-author-email "admin@roundhouse-designs.com"
+npm config set init-author-url "https://roundhouse-designs.com"
+npm add --save-dev grunt grunt-contrib-stylus grunt-contrib-watch grunt-contrib-jshint livereload-js
+npm init --yes
+npm install
 
 # Set up GitHub repository
 echo "Initializing GitHub repository..."
@@ -88,13 +91,9 @@ git commit -m "Initial commit"
 git remote add origin git@github.com:gaswirth/"$REPONAME".git
 git push -u origin master
 
-# Create the primary nav menu, and add the Sample Page for display
-# wp menu create "Main Navigation"
-# wp menu location assign "Site Navigation" primary
-# wp menu item add-post 2 --title="Sample"
-
-# Make sure to "exit" back to the root dir.
+# Make sure to "exit" back to the root dir, and then activate the theme.
 cd "$SITEROOT"
+wp theme activate rhdwp
 
 ## PLUGINS
 echo "Installing plugins..."
@@ -107,7 +106,8 @@ cp -rv /home/gaswirth/resource/plugins/wp-defender wp-content/plugins
 cp -rv /home/gaswirth/resources/plugins/soliloquy wp-content/plugins
 
 # Install and activate plugins
-wp plugin install ajax-thumbnail-rebuild enable-media-replace force-strong-passwords social-warfare schema --activate
+wp plugin install ajax-thumbnail-rebuild enable-media-replace force-strong-passwords social-warfare gutenberg --activate
+wp plugin delete hello
 
 # Plugins for install only
 # (None)
@@ -119,9 +119,23 @@ wp plugin update --all --quiet
 
 # Finish user creation
 echo "Create users..."
-wp user create ryan ryan@roundhouse-designs.com --role="administrator" --first_name="Ryan" --last_name="Foy" --send-email
+if [ "$SENDEMAILS" = "y" ] || [ "$SENDEMAILS" = "Y" ]; then
+	wp user create ryan ryan@roundhouse-designs.com --role="administrator" --first_name="Ryan" --last_name="Foy" --send-email
+else
+	wp user create ryan ryan@roundhouse-designs.com --role="administrator" --first_name="Ryan" --last_name="Foy"
+fi
+
 wp user update nick --first_name="Nick" --last_name="Gaswirth"
 wp user update nick ryan --user_url="https://roundhouse-designs.com"
+
+# Multisite setup
+if [ "$MULTISITE" = "y" ] || [ "MULTISITE" = "Y" ]; then
+	sed -i "/define('WP_DEBUG', false);/ a\
+	\/* Multisite *\/\
+	define( 'WP_ALLOW_MULTISITE', true );\
+	" wp-config.php
+fi
+
 
 # Set final permissions
 echo "Finalizing..."
